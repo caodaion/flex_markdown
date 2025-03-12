@@ -1,0 +1,21 @@
+name: flex_markdown
+description: A flexible markdown package that supports custom inline elements like form fields and centered text.
+version: 0.1.0
+homepage: https://github.com/yourusername/flex_markdown
+
+environment:
+  sdk: '>=2.18.0 <4.0.0'
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  url_launcher: ^6.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  # No assets needed for now
