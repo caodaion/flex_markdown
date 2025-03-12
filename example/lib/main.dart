@@ -111,6 +111,19 @@ this line have a *second italic* text
 ->This is centered text<-
 
 This is a paragraph with a [link](https://www.example.com)
+
+This is a paragraph with a [second link](https://www.example.com)
+
+{{textfield|username|Username|Enter your username}}
+
+{{select|country|Select Country|USA,Canada,UK,Australia}}
+
+{{checkbox|terms|Accept Terms and Conditions|true}}
+
+{{radio|option1|First Option|question1|true}}
+
+{{radio|option2|Second Option|question1|false}}
+
 ''',
       ),
     );

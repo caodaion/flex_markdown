@@ -43,16 +43,18 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: _elements.map((element) {
-        try {
-          return element.build(context);
-        } catch (e) {
-          // Handle element building errors gracefully
-          return Text('Error rendering element: ${e.toString()}');
-        }
-      }).toList(),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: _elements.map((element) {
+          try {
+            return element.build(context);
+          } catch (e) {
+            // Handle element building errors gracefully
+            return Text('Error rendering element: ${e.toString()}');
+          }
+        }).toList(),
+      ),
     );
   }
 }
