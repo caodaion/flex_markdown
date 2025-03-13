@@ -364,3 +364,84 @@ class CodeBlockElement extends MarkdownElement {
     );
   }
 }
+
+/// Represents a horizontal rule element
+class HorizontalRuleElement extends MarkdownElement {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16.0),
+      height: 1.0,
+      color: Colors.grey.shade300,
+    );
+  }
+}
+
+/// Represents a table element
+class TableElement extends MarkdownElement {
+  final List<List<String>> rows;
+  final bool hasHeader;
+
+  TableElement({required this.rows, this.hasHeader = true});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Table(
+        border: TableBorder.all(
+          color: Colors.grey.shade300,
+          width: 1.0,
+        ),
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        children: _buildTableRows(context),
+      ),
+    );
+  }
+
+  List<TableRow> _buildTableRows(BuildContext context) {
+    List<TableRow> tableRows = [];
+
+    // Process header row
+    if (hasHeader && rows.isNotEmpty) {
+      tableRows.add(
+        TableRow(
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+          ),
+          children: rows[0]
+              .map((cell) => _buildTableCell(context, cell, true))
+              .toList(),
+        ),
+      );
+    }
+
+    // Process data rows
+    int startIndex = hasHeader ? 1 : 0;
+    for (int i = startIndex; i < rows.length; i++) {
+      tableRows.add(
+        TableRow(
+          children: rows[i]
+              .map((cell) => _buildTableCell(context, cell, false))
+              .toList(),
+        ),
+      );
+    }
+
+    return tableRows;
+  }
+
+  Widget _buildTableCell(BuildContext context, String text, bool isHeader) {
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
+          fontSize: 14.0,
+        ),
+        textAlign: isHeader ? TextAlign.center : TextAlign.start,
+      ),
+    );
+  }
+}

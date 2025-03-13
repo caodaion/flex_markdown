@@ -23,6 +23,10 @@ class FlexMarkdownParser {
     String codeBlockContent = '';
     String? codeBlockLanguage;
 
+    // For tracking table state
+    bool inTable = false;
+    List<List<String>> tableRows = [];
+
     for (int i = 0; i < lines.length; i++) {
       String line = lines[i];
 
@@ -52,6 +56,49 @@ class FlexMarkdownParser {
       if (inCodeBlock) {
         codeBlockContent += line + '\n';
         continue;
+      }
+
+      // Process horizontal rule
+      if (RegExp(r'^\s*(---|\*\*\*|___)\s*$').hasMatch(line)) {
+        // End any ongoing elements
+        if (inTable) {
+          elements.add(TableElement(rows: List.from(tableRows)));
+          tableRows = [];
+          inTable = false;
+        }
+
+        elements.add(HorizontalRuleElement());
+        continue;
+      }
+
+      // Process tables
+      if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+        // Start or continue table
+        if (!inTable) {
+          inTable = true;
+          tableRows = [];
+        }
+
+        // Extract cells from the line
+        List<String> cells = line
+            .trim()
+            .substring(1, line.trim().length - 1)
+            .split('|')
+            .map((cell) => cell.trim())
+            .toList();
+
+        // Skip separator row (e.g., |---|---|---|)
+        if (cells.every((cell) => RegExp(r'^:?-+:?$').hasMatch(cell))) {
+          continue;
+        }
+
+        tableRows.add(cells);
+        continue;
+      } else if (inTable) {
+        // End of table
+        elements.add(TableElement(rows: List.from(tableRows)));
+        tableRows = [];
+        inTable = false;
       }
 
       // Process blockquotes
@@ -241,6 +288,11 @@ class FlexMarkdownParser {
         code: codeBlockContent.trim(),
         language: codeBlockLanguage,
       ));
+    }
+
+    // Handle unclosed table at the end
+    if (inTable && tableRows.isNotEmpty) {
+      elements.add(TableElement(rows: List.from(tableRows)));
     }
 
     return elements;
