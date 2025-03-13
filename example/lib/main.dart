@@ -89,6 +89,9 @@ class _MyHomePageState extends State<MyHomePage> {
       body: FlexMarkdownWidget(
         isHorizontalLayout: true,
         showTextField: true,
+        showController: true,
+        enableTextSelection: true,
+        controllerPosition: MarkdownControllerPosition.above,
         data: '''
 # Markdown Demo
 
