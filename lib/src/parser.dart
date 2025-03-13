@@ -6,7 +6,9 @@ class FlexMarkdownParser {
   /// Parse markdown string into a list of MarkdownElement objects
   static List<MarkdownElement> parse(String markdown,
       {Map<String, dynamic>? formValues,
-      FormValueChangedCallback? onValueChanged}) {
+      FormValueChangedCallback? onValueChanged,
+      bool isPrintMode = false}) {
+    // Added isPrintMode parameter
     List<MarkdownElement> elements = [];
     List<String> lines = markdown.split('\n');
 
@@ -288,11 +290,15 @@ class FlexMarkdownParser {
           // Standalone form element (existing behavior)
           String formContent = _extractBetween(line, '{{', '}}');
           elements.add(_parseFormElement(formContent,
-              onValueChanged: onValueChanged, formValues: formValues));
+              onValueChanged: onValueChanged,
+              formValues: formValues,
+              isPrintMode: isPrintMode)); // Pass isPrintMode
         } else {
           // Inline form element - process as mixed content
           elements.add(_processMixedContent(line,
-              onValueChanged: onValueChanged, formValues: formValues));
+              onValueChanged: onValueChanged,
+              formValues: formValues,
+              isPrintMode: isPrintMode)); // Pass isPrintMode
         }
         continue;
       }
@@ -546,7 +552,9 @@ class FlexMarkdownParser {
   /// Process text with potentially inline form elements
   static MarkdownElement _processMixedContent(String text,
       {Map<String, dynamic>? formValues,
-      FormValueChangedCallback? onValueChanged}) {
+      FormValueChangedCallback? onValueChanged,
+      bool isPrintMode = false}) {
+    // Added isPrintMode parameter
     // If there are no form elements, process as regular text with formatting
     if (!text.contains('{{') || !text.contains('}}')) {
       return processInlineFormatting(text);
@@ -587,7 +595,8 @@ class FlexMarkdownParser {
       elements.add(_parseFormElement(formContent,
           isInline: true,
           formValues: formValues,
-          onValueChanged: onValueChanged));
+          onValueChanged: onValueChanged,
+          isPrintMode: isPrintMode)); // Pass isPrintMode
 
       // Move position after this form element
       currentPos = formEndPos + 2;
@@ -621,7 +630,9 @@ class FlexMarkdownParser {
   static MarkdownElement _parseFormElement(String formContent,
       {bool isInline = false,
       Map<String, dynamic>? formValues,
-      FormValueChangedCallback? onValueChanged}) {
+      FormValueChangedCallback? onValueChanged,
+      bool isPrintMode = false}) {
+    // Added isPrintMode parameter
     List<String> parts = formContent.split('|');
     String type = parts[0].trim().toLowerCase();
     String id = parts.length > 1 ? parts[1].trim() : 'default_id';
@@ -639,7 +650,8 @@ class FlexMarkdownParser {
             hint: hint,
             initialValue: initialValue,
             isInline: isInline,
-            onValueChanged: onValueChanged);
+            onValueChanged: onValueChanged,
+            isPrintMode: isPrintMode); // Pass isPrintMode
 
       case 'select':
         String label = parts.length > 2 ? parts[2].trim() : '';
@@ -657,7 +669,8 @@ class FlexMarkdownParser {
             options: options,
             initialValue: initialValue,
             isInline: isInline,
-            onValueChanged: onValueChanged);
+            onValueChanged: onValueChanged,
+            isPrintMode: isPrintMode); // Pass isPrintMode
 
       case 'checkbox':
         String label = parts.length > 2 ? parts[2].trim() : '';
@@ -670,6 +683,7 @@ class FlexMarkdownParser {
           initialValue: initialValue,
           isInline: isInline,
           onValueChanged: onValueChanged,
+          isPrintMode: isPrintMode, // Pass isPrintMode
         );
 
       case 'radio':
@@ -685,6 +699,7 @@ class FlexMarkdownParser {
           selected: selected,
           isInline: isInline,
           onValueChanged: onValueChanged,
+          isPrintMode: isPrintMode, // Pass isPrintMode
         );
 
       default:

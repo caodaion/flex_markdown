@@ -7,6 +7,7 @@ class TextFieldElement extends FormElement {
   final String hint;
   final bool isInline;
   final String? initialValue;
+  final bool isPrintMode; // Add isPrintMode flag
 
   TextFieldElement(
       {required super.id,
@@ -14,10 +15,16 @@ class TextFieldElement extends FormElement {
       this.hint = '',
       this.isInline = false,
       this.initialValue,
-      super.onValueChanged});
+      super.onValueChanged,
+      this.isPrintMode = false}); // Default to false
 
   @override
   Widget build(BuildContext context) {
+    // In print mode, just show the value as text
+    if (isPrintMode) {
+      return Text(initialValue ?? '', style: TextStyle(fontSize: 16.0));
+    }
+
     if (isInline) {
       return IntrinsicWidth(
         child: Container(
@@ -78,6 +85,7 @@ class SelectElement extends FormElement {
   final List<String> options;
   final bool isInline;
   final String? initialValue;
+  final bool isPrintMode; // Add isPrintMode flag
 
   SelectElement(
       {required super.id,
@@ -85,10 +93,16 @@ class SelectElement extends FormElement {
       required this.options,
       this.isInline = false,
       this.initialValue,
-      super.onValueChanged});
+      super.onValueChanged,
+      this.isPrintMode = false}); // Default to false
 
   @override
   Widget build(BuildContext context) {
+    // In print mode, just show the selected value as text
+    if (isPrintMode) {
+      return Text(initialValue ?? '', style: TextStyle(fontSize: 16.0));
+    }
+
     if (isInline) {
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -159,16 +173,25 @@ class CheckboxElement extends FormElement {
   final String label;
   final bool initialValue;
   final bool isInline;
+  final bool isPrintMode; // Add isPrintMode flag
 
   CheckboxElement(
       {required super.id,
       required this.label,
       this.initialValue = false,
       this.isInline = false,
-      super.onValueChanged});
+      super.onValueChanged,
+      this.isPrintMode = false}); // Default to false
 
   @override
   Widget build(BuildContext context) {
+    // In print mode, show only the label if checked
+    if (isPrintMode) {
+      return initialValue
+          ? Text(label, style: TextStyle(fontSize: 16.0))
+          : SizedBox.shrink(); // Hide if not checked
+    }
+
     if (isInline) {
       return IntrinsicWidth(
         child: Container(
@@ -217,6 +240,7 @@ class RadioElement extends FormElement {
   final String groupName;
   final bool selected;
   final bool isInline;
+  final bool isPrintMode; // Add isPrintMode flag
 
   RadioElement(
       {required super.id,
@@ -224,10 +248,18 @@ class RadioElement extends FormElement {
       required this.groupName,
       this.selected = false,
       this.isInline = false,
-      super.onValueChanged});
+      super.onValueChanged,
+      this.isPrintMode = false}); // Default to false
 
   @override
   Widget build(BuildContext context) {
+    // In print mode, show only the label if selected
+    if (isPrintMode) {
+      return selected
+          ? Text(label, style: TextStyle(fontSize: 16.0))
+          : SizedBox.shrink(); // Hide if not selected
+    }
+
     if (isInline) {
       return IntrinsicWidth(
         child: Container(

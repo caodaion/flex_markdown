@@ -14,6 +14,7 @@ class FlexMarkdownWidget extends StatefulWidget {
   final bool enableTextSelection;
   final bool showController;
   final MarkdownControllerPosition controllerPosition;
+  final bool isPrintMode; // Added new parameter
 
   const FlexMarkdownWidget({
     Key? key,
@@ -23,6 +24,7 @@ class FlexMarkdownWidget extends StatefulWidget {
     this.enableTextSelection = true,
     this.showController = true,
     this.controllerPosition = MarkdownControllerPosition.above,
+    this.isPrintMode = false, // Default to false
   }) : super(key: key);
 
   @override
@@ -46,11 +48,12 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
 
   void _parseMarkdown() {
     try {
-      // Pass the form values and update callback to the parser
+      // Pass the form values, update callback, and print mode flag to the parser
       _elements = FlexMarkdownParser.parse(
         _currentData,
         formValues: _formValues,
         onValueChanged: _handleFormValueChanged,
+        isPrintMode: widget.isPrintMode, // Pass the print mode flag
       );
     } catch (e) {
       // Handle parsing errors gracefully
