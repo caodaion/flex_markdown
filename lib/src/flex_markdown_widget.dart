@@ -33,6 +33,8 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   late List<MarkdownElement> _elements;
   late TextEditingController _controller;
   late String _currentData;
+  // Add a map to track form field values
+  Map<String, dynamic> _formValues = {};
 
   @override
   void initState() {
@@ -44,13 +46,27 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
 
   void _parseMarkdown() {
     try {
-      _elements = FlexMarkdownParser.parse(_currentData);
+      // Pass the form values and update callback to the parser
+      _elements = FlexMarkdownParser.parse(
+        _currentData,
+        formValues: _formValues,
+        onValueChanged: _handleFormValueChanged,
+      );
     } catch (e) {
       // Handle parsing errors gracefully
       _elements = [
         ParagraphElement(text: 'Error parsing markdown: ${e.toString()}')
       ];
     }
+  }
+
+  // Add a method to handle form value changes
+  void _handleFormValueChanged(String id, dynamic value) {
+    setState(() {
+      _formValues[id] = value;
+      // Re-parse markdown to update the UI
+      _parseMarkdown();
+    });
   }
 
   @override

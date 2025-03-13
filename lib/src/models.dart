@@ -3,6 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
+// Add a typedef for the form value changed callback
+typedef FormValueChangedCallback = void Function(String id, dynamic value);
+
 /// Base class for all markdown elements
 abstract class MarkdownElement {
   Widget build(BuildContext context);
@@ -130,8 +133,7 @@ class CenterElement extends MarkdownElement {
 /// Base class for form elements
 abstract class FormElement extends MarkdownElement {
   final String id;
-  // Add a callback type to handle value changes
-  final Function(String id, dynamic value)? onValueChanged;
+  final FormValueChangedCallback? onValueChanged;
 
   FormElement({required this.id, this.onValueChanged});
 }

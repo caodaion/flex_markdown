@@ -5,7 +5,8 @@ import 'widgets/form_elements.dart';
 class FlexMarkdownParser {
   /// Parse markdown string into a list of MarkdownElement objects
   static List<MarkdownElement> parse(String markdown,
-      {Function(String, dynamic)? onValueChanged}) {
+      {Map<String, dynamic>? formValues,
+      FormValueChangedCallback? onValueChanged}) {
     List<MarkdownElement> elements = [];
     List<String> lines = markdown.split('\n');
 
@@ -286,12 +287,12 @@ class FlexMarkdownParser {
         if (line.trim().startsWith('{{') && line.trim().endsWith('}}')) {
           // Standalone form element (existing behavior)
           String formContent = _extractBetween(line, '{{', '}}');
-          elements.add(
-              _parseFormElement(formContent, onValueChanged: onValueChanged));
+          elements.add(_parseFormElement(formContent,
+              onValueChanged: onValueChanged, formValues: formValues));
         } else {
           // Inline form element - process as mixed content
-          elements
-              .add(_processMixedContent(line, onValueChanged: onValueChanged));
+          elements.add(_processMixedContent(line,
+              onValueChanged: onValueChanged, formValues: formValues));
         }
         continue;
       }
@@ -544,7 +545,8 @@ class FlexMarkdownParser {
 
   /// Process text with potentially inline form elements
   static MarkdownElement _processMixedContent(String text,
-      {Function(String, dynamic)? onValueChanged}) {
+      {Map<String, dynamic>? formValues,
+      FormValueChangedCallback? onValueChanged}) {
     // If there are no form elements, process as regular text with formatting
     if (!text.contains('{{') || !text.contains('}}')) {
       return processInlineFormatting(text);
@@ -582,7 +584,10 @@ class FlexMarkdownParser {
 
       // Extract and parse the form element
       String formContent = text.substring(formStartPos + 2, formEndPos);
-      elements.add(_parseFormElement(formContent, isInline: true));
+      elements.add(_parseFormElement(formContent,
+          isInline: true,
+          formValues: formValues,
+          onValueChanged: onValueChanged));
 
       // Move position after this form element
       currentPos = formEndPos + 2;
@@ -614,7 +619,9 @@ class FlexMarkdownParser {
 
   /// Parse form element syntax
   static MarkdownElement _parseFormElement(String formContent,
-      {bool isInline = false, Function(String, dynamic)? onValueChanged}) {
+      {bool isInline = false,
+      Map<String, dynamic>? formValues,
+      FormValueChangedCallback? onValueChanged}) {
     List<String> parts = formContent.split('|');
     String type = parts[0].trim().toLowerCase();
     String id = parts.length > 1 ? parts[1].trim() : 'default_id';
@@ -623,7 +630,9 @@ class FlexMarkdownParser {
       case 'textfield':
         String label = parts.length > 2 ? parts[2].trim() : '';
         String hint = parts.length > 3 ? parts[3].trim() : '';
-        String? initialValue = parts.length > 4 ? parts[4].trim() : null;
+        String? initialValue = formValues != null && formValues.containsKey(id)
+            ? formValues[id]?.toString()
+            : (parts.length > 4 ? parts[4].trim() : null);
         return TextFieldElement(
             id: id,
             label: label,
@@ -637,10 +646,11 @@ class FlexMarkdownParser {
         List<String> options = parts.length > 3
             ? parts[3].split(',').map((e) => e.trim()).toList()
             : [];
-        String? initialValue =
-            parts.length > 4 && options.contains(parts[4].trim())
+        String? initialValue = formValues != null && formValues.containsKey(id)
+            ? formValues[id]?.toString()
+            : (parts.length > 4 && options.contains(parts[4].trim())
                 ? parts[4].trim()
-                : null;
+                : null);
         return SelectElement(
             id: id,
             label: label,
@@ -651,8 +661,9 @@ class FlexMarkdownParser {
 
       case 'checkbox':
         String label = parts.length > 2 ? parts[2].trim() : '';
-        bool initialValue =
-            parts.length > 3 ? parts[3].trim() == 'true' : false;
+        bool initialValue = formValues != null && formValues.containsKey(id)
+            ? formValues[id] == true
+            : (parts.length > 3 ? parts[3].trim() == 'true' : false);
         return CheckboxElement(
           id: id,
           label: label,
@@ -664,7 +675,9 @@ class FlexMarkdownParser {
       case 'radio':
         String label = parts.length > 2 ? parts[2].trim() : '';
         String groupName = parts.length > 3 ? parts[3].trim() : 'defaultGroup';
-        bool selected = parts.length > 4 ? parts[4].trim() == 'true' : false;
+        bool selected = formValues != null && formValues.containsKey(groupName)
+            ? formValues[groupName] == id
+            : (parts.length > 4 ? parts[4].trim() == 'true' : false);
         return RadioElement(
           id: id,
           label: label,
