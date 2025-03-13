@@ -87,6 +87,8 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: FlexMarkdownWidget(
+        isHorizontalLayout: true,
+        showTextField: true,
         data: '''
 # Markdown Demo
 
