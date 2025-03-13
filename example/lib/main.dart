@@ -165,7 +165,7 @@ void main() {
 
 ## Mixed Formatting
 
-->### Centered heading with [**Bold Link**](https://example.com)<-
+->### Centered heading with [***Bold Link***](https://example.com)<-
 
 - List item with [*italic link*](https://flutter.dev)
 - List item with **bold text** and `inline code`

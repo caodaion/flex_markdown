@@ -14,12 +14,14 @@ class HeadingElement extends MarkdownElement {
   final String text;
   final TextAlign? textAlign;
   final bool isCentered;
+  final FormattedTextElement? formattedContent;
 
   HeadingElement({
     required this.level,
     required this.text,
     this.textAlign,
     this.isCentered = false,
+    this.formattedContent,
   });
 
   @override
@@ -47,22 +49,35 @@ class HeadingElement extends MarkdownElement {
         break;
     }
 
-    final headingText = Text(
-      text,
-      style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
-      textAlign: textAlign ?? (isCentered ? TextAlign.center : null),
-    );
+    Widget content;
+    if (formattedContent != null) {
+      // Create a styled version of the formatted text using the heading's style
+      content = DefaultTextStyle.merge(
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+        ),
+        child: formattedContent!.build(context),
+      );
+    } else {
+      // Use regular Text widget for simple text
+      content = Text(
+        text,
+        style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+        textAlign: textAlign ?? (isCentered ? TextAlign.center : null),
+      );
+    }
 
     return isCentered
         ? Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             alignment: Alignment.center,
-            child: headingText,
+            child: content,
           )
         : Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: headingText,
+            child: content,
           );
   }
 }

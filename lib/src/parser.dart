@@ -222,8 +222,26 @@ class FlexMarkdownParser {
           level++;
         }
         String text = headingLine.substring(level).trim();
-        elements
-            .add(HeadingElement(level: level, text: text, isCentered: true));
+
+        // Process inline formatting in the heading text
+        MarkdownElement innerElement = processInlineFormatting(text);
+
+        // If the innerElement is a FormattedTextElement, use its spans to create a formatted heading
+        if (innerElement is FormattedTextElement) {
+          elements.add(HeadingElement(
+            level: level,
+            text: text,
+            isCentered: true,
+            formattedContent: innerElement,
+          ));
+        } else {
+          // Fallback to original behavior for simple text
+          elements.add(HeadingElement(
+            level: level,
+            text: text,
+            isCentered: true,
+          ));
+        }
         continue;
       }
 
@@ -234,7 +252,21 @@ class FlexMarkdownParser {
           level++;
         }
         String text = line.substring(level).trim();
-        elements.add(HeadingElement(level: level, text: text));
+
+        // Process inline formatting in the heading text
+        MarkdownElement innerElement = processInlineFormatting(text);
+
+        // If the innerElement is a FormattedTextElement, use its spans to create a formatted heading
+        if (innerElement is FormattedTextElement) {
+          elements.add(HeadingElement(
+            level: level,
+            text: text,
+            formattedContent: innerElement,
+          ));
+        } else {
+          // Fallback to original behavior for simple text
+          elements.add(HeadingElement(level: level, text: text));
+        }
         continue;
       }
 
