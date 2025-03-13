@@ -130,8 +130,10 @@ class CenterElement extends MarkdownElement {
 /// Base class for form elements
 abstract class FormElement extends MarkdownElement {
   final String id;
+  // Add a callback type to handle value changes
+  final Function(String id, dynamic value)? onValueChanged;
 
-  FormElement({required this.id});
+  FormElement({required this.id, this.onValueChanged});
 }
 
 /// Represents a span of text with optional formatting
@@ -456,6 +458,25 @@ class TableElement extends MarkdownElement {
           fontSize: 14.0,
         ),
         textAlign: isHeader ? TextAlign.center : TextAlign.start,
+      ),
+    );
+  }
+}
+
+/// Element that contains a mix of text and form elements
+class MixedContentElement extends MarkdownElement {
+  final List<MarkdownElement> children;
+
+  MixedContentElement({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Wrap(
+        alignment: WrapAlignment.start,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: children.map((element) => element.build(context)).toList(),
       ),
     );
   }

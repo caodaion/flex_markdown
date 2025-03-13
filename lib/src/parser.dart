@@ -4,7 +4,8 @@ import 'widgets/form_elements.dart';
 
 class FlexMarkdownParser {
   /// Parse markdown string into a list of MarkdownElement objects
-  static List<MarkdownElement> parse(String markdown) {
+  static List<MarkdownElement> parse(String markdown,
+      {Function(String, dynamic)? onValueChanged}) {
     List<MarkdownElement> elements = [];
     List<String> lines = markdown.split('\n');
 
@@ -281,20 +282,17 @@ class FlexMarkdownParser {
 
       // Process form elements
       if (line.contains('{{') && line.contains('}}')) {
-        String beforeInput = line.substring(0, line.indexOf('{{'));
-        String formContent = _extractBetween(line, '{{', '}}');
-        String afterInput = line.substring(line.indexOf('}}') + 2);
-
-        if (beforeInput.isNotEmpty) {
-          elements.add(ParagraphElement(text: beforeInput));
+        // Check if the form element is the entire line or part of a paragraph
+        if (line.trim().startsWith('{{') && line.trim().endsWith('}}')) {
+          // Standalone form element (existing behavior)
+          String formContent = _extractBetween(line, '{{', '}}');
+          elements.add(
+              _parseFormElement(formContent, onValueChanged: onValueChanged));
+        } else {
+          // Inline form element - process as mixed content
+          elements
+              .add(_processMixedContent(line, onValueChanged: onValueChanged));
         }
-
-        elements.add(_parseFormElement(formContent));
-
-        if (afterInput.isNotEmpty) {
-          elements.add(ParagraphElement(text: afterInput));
-        }
-
         continue;
       }
 
@@ -544,6 +542,55 @@ class FlexMarkdownParser {
     return FormattedTextElement(spans: spans);
   }
 
+  /// Process text with potentially inline form elements
+  static MarkdownElement _processMixedContent(String text,
+      {Function(String, dynamic)? onValueChanged}) {
+    // If there are no form elements, process as regular text with formatting
+    if (!text.contains('{{') || !text.contains('}}')) {
+      return processInlineFormatting(text);
+    }
+
+    List<MarkdownElement> elements = [];
+    int currentPos = 0;
+
+    while (currentPos < text.length) {
+      int formStartPos = text.indexOf('{{', currentPos);
+
+      if (formStartPos == -1) {
+        // No more form elements, process the rest as formatted text
+        String remainingText = text.substring(currentPos);
+        if (remainingText.isNotEmpty) {
+          elements.add(processInlineFormatting(remainingText));
+        }
+        break;
+      }
+
+      // Process text before form element
+      if (formStartPos > currentPos) {
+        String beforeText = text.substring(currentPos, formStartPos);
+        elements.add(processInlineFormatting(beforeText));
+      }
+
+      // Find the end of the form element
+      int formEndPos = text.indexOf('}}', formStartPos);
+      if (formEndPos == -1) {
+        // No closing bracket, treat as regular text
+        String remainingText = text.substring(currentPos);
+        elements.add(processInlineFormatting(remainingText));
+        break;
+      }
+
+      // Extract and parse the form element
+      String formContent = text.substring(formStartPos + 2, formEndPos);
+      elements.add(_parseFormElement(formContent, isInline: true));
+
+      // Move position after this form element
+      currentPos = formEndPos + 2;
+    }
+
+    return MixedContentElement(children: elements);
+  }
+
   /// Find the earliest valid position, ignoring -1 values
   static int _findEarliestPosition(List<int> positions) {
     int earliest = -1;
@@ -566,7 +613,8 @@ class FlexMarkdownParser {
   }
 
   /// Parse form element syntax
-  static MarkdownElement _parseFormElement(String formContent) {
+  static MarkdownElement _parseFormElement(String formContent,
+      {bool isInline = false, Function(String, dynamic)? onValueChanged}) {
     List<String> parts = formContent.split('|');
     String type = parts[0].trim().toLowerCase();
     String id = parts.length > 1 ? parts[1].trim() : 'default_id';
@@ -575,14 +623,31 @@ class FlexMarkdownParser {
       case 'textfield':
         String label = parts.length > 2 ? parts[2].trim() : '';
         String hint = parts.length > 3 ? parts[3].trim() : '';
-        return TextFieldElement(id: id, label: label, hint: hint);
+        String? initialValue = parts.length > 4 ? parts[4].trim() : null;
+        return TextFieldElement(
+            id: id,
+            label: label,
+            hint: hint,
+            initialValue: initialValue,
+            isInline: isInline,
+            onValueChanged: onValueChanged);
 
       case 'select':
         String label = parts.length > 2 ? parts[2].trim() : '';
         List<String> options = parts.length > 3
             ? parts[3].split(',').map((e) => e.trim()).toList()
             : [];
-        return SelectElement(id: id, label: label, options: options);
+        String? initialValue =
+            parts.length > 4 && options.contains(parts[4].trim())
+                ? parts[4].trim()
+                : null;
+        return SelectElement(
+            id: id,
+            label: label,
+            options: options,
+            initialValue: initialValue,
+            isInline: isInline,
+            onValueChanged: onValueChanged);
 
       case 'checkbox':
         String label = parts.length > 2 ? parts[2].trim() : '';
@@ -592,6 +657,8 @@ class FlexMarkdownParser {
           id: id,
           label: label,
           initialValue: initialValue,
+          isInline: isInline,
+          onValueChanged: onValueChanged,
         );
 
       case 'radio':
@@ -603,6 +670,8 @@ class FlexMarkdownParser {
           label: label,
           groupName: groupName,
           selected: selected,
+          isInline: isInline,
+          onValueChanged: onValueChanged,
         );
 
       default:

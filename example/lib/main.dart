@@ -175,6 +175,27 @@ void main() {
 - List item with [*italic link*](https://flutter.dev)
 - List item with **bold text** and `inline code`
 
+## Form Elements
+
+### Text Field
+This is a sample text field: {{textfield|name_field|Name|Enter your name}}
+
+### Checkbox
+Here's a checkbox: {{checkbox|terms_check|I agree to the terms and conditions|false}}
+
+### Radio Buttons
+Choose one: 
+{{radio|option1|Option 1|group1|true}} 
+{{radio|option2|Option 2|group1|false}}
+{{radio|option3|Option 3|group1|false}}
+
+### Dropdown Select
+Select your country: {{select|country|Country|USA,Canada,Mexico,UK,Australia,Japan}} and it should be a required field.
+
+### Mixed Forms in Paragraph
+This paragraph contains {{textfield|inline_field|inline text field|example}} and also 
+{{checkbox|inline_check|an inline checkbox|true}} mixed with regular text.
+
 ---
 
 Made with Flutter and FlexMarkdown

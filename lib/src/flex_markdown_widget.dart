@@ -194,6 +194,39 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
     });
   }
 
+  void _applyTextField() {
+    _insertInlineElement('{{textfield|id|Label|Placeholder}}');
+  }
+
+  void _applyCheckbox() {
+    _insertInlineElement('{{checkbox|id|Checkbox label|false}}');
+  }
+
+  void _applyRadio() {
+    _insertInlineElement('{{radio|id|Radio label|groupName|false}}');
+  }
+
+  void _applySelect() {
+    _insertInlineElement('{{select|id|Dropdown|Option 1,Option 2,Option 3}}');
+  }
+
+  void _insertInlineElement(String element) {
+    final TextEditingValue value = _controller.value;
+    final int start = value.selection.start;
+    final int end = value.selection.end;
+
+    final TextEditingValue newValue = TextEditingValue(
+      text: value.text.replaceRange(start, end, element),
+      selection: TextSelection.collapsed(offset: start + element.length),
+    );
+
+    _controller.value = newValue;
+    setState(() {
+      _currentData = _controller.text;
+      _parseMarkdown();
+    });
+  }
+
   Widget _buildMarkdownController() {
     if (!widget.showController || !widget.showTextField) return Container();
 
@@ -314,6 +347,29 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
               icon: const Icon(Icons.horizontal_rule),
               tooltip: 'Horizontal Rule',
               onPressed: _applyHorizontalRule,
+            ),
+
+            // Form element buttons
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.text_fields),
+              tooltip: 'Inline Text Field',
+              onPressed: _applyTextField,
+            ),
+            IconButton(
+              icon: const Icon(Icons.check_box),
+              tooltip: 'Inline Checkbox',
+              onPressed: _applyCheckbox,
+            ),
+            IconButton(
+              icon: const Icon(Icons.radio_button_checked),
+              tooltip: 'Inline Radio Button',
+              onPressed: _applyRadio,
+            ),
+            IconButton(
+              icon: const Icon(Icons.arrow_drop_down_circle),
+              tooltip: 'Inline Dropdown',
+              onPressed: _applySelect,
             ),
           ],
         ),
