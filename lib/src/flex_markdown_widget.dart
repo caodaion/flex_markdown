@@ -37,12 +37,14 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   late String _currentData;
   // Add a map to track form field values
   Map<String, dynamic> _formValues = {};
+  late bool _isPrintMode; // Add state variable for print mode
 
   @override
   void initState() {
     super.initState();
     _currentData = widget.data ?? '';
     _controller = TextEditingController(text: _currentData);
+    _isPrintMode = widget.isPrintMode; // Initialize from widget property
     _parseMarkdown();
   }
 
@@ -53,7 +55,7 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
         _currentData,
         formValues: _formValues,
         onValueChanged: _handleFormValueChanged,
-        isPrintMode: widget.isPrintMode, // Pass the print mode flag
+        isPrintMode: _isPrintMode, // Use the state variable
       );
     } catch (e) {
       // Handle parsing errors gracefully
@@ -75,9 +77,12 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   @override
   void didUpdateWidget(FlexMarkdownWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.data != widget.data) {
+    if (oldWidget.data != widget.data ||
+        oldWidget.isPrintMode != widget.isPrintMode) {
       _currentData = widget.data ?? '';
       _controller.text = _currentData;
+      _isPrintMode =
+          widget.isPrintMode; // Update state when widget property changes
       setState(() {
         _parseMarkdown();
       });
@@ -243,6 +248,14 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
     setState(() {
       _currentData = _controller.text;
       _parseMarkdown();
+    });
+  }
+
+  // Add a method to toggle print mode
+  void _togglePrintMode() {
+    setState(() {
+      _isPrintMode = !_isPrintMode;
+      _parseMarkdown(); // Re-parse with the new mode
     });
   }
 
@@ -414,6 +427,21 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
                       Text('Dropdown'),
                     ],
                   ),
+                ),
+              ],
+            ),
+
+            // Add print mode toggle
+            const SizedBox(width: 16),
+            Row(
+              children: [
+                Text('Print Mode:'),
+                const SizedBox(width: 4),
+                Switch(
+                  value: _isPrintMode,
+                  onChanged: (value) {
+                    _togglePrintMode();
+                  },
                 ),
               ],
             ),

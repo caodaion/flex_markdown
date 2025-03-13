@@ -91,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
         showTextField: true,
         showController: true,
         enableTextSelection: true,
-        isPrintMode: true,
+        isPrintMode: false,
         controllerPosition: MarkdownControllerPosition.above,
         data: '''
 # Markdown Demo
