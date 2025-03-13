@@ -88,42 +88,91 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: FlexMarkdownWidget(
         data: '''
-# this is heading 1
-# this is second heading 1
-## this is heading 2
-## this is second heading 2
-### this is heading 3
-### this is second heading 3
-#### this is heading 4
-#### this is second heading 4
-##### this is heading 5
-##### this is second heading 5
-###### this is heading 6
-###### this is second heading 6
+# Markdown Demo
 
-**This is bold**
-**This is second bold**
-This line have a **bold** text
-this line have a **second bold** text
-this line have a *italic* text
-this line have a *second italic* text
+## Basic Typography
 
-->This is centered text<-
+Regular paragraph text. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 
-This is a paragraph with a [link](https://www.example.com)
+**Bold text** and *italic text* with ***bold and italic*** combinations.
 
-This is a paragraph with a [second link](https://www.example.com)
+## Headings
 
-{{textfield|username|Username|Enter your username}}
+# Heading 1
+## Heading 2
+### Heading 3
+#### Heading 4
+##### Heading 5
+###### Heading 6
 
-{{select|country|Select Country|USA,Canada,UK,Australia}}
+## Centered Content
 
-{{checkbox|terms|Accept Terms and Conditions|true}}
+->## Centered Heading<-
 
-{{radio|option1|First Option|question1|true}}
+->This is centered paragraph text with **bold** and *italic* formatting.<-
 
-{{radio|option2|Second Option|question1|false}}
+## Links
 
+[Basic link](https://flutter.dev)
+
+[**Bold link**](https://flutter.dev)
+
+[*Italic link*](https://flutter.dev)
+
+## Lists
+
+### Unordered List
+* Item 1
+* Item 2
+  * Nested item 2.1
+  * Nested item 2.2
+* Item 3
+
+### Ordered List
+1. First item
+2. Second item
+3. Third item
+
+## Blockquotes
+
+> This is a blockquote.
+> 
+> Multiple paragraphs can be included.
+>
+> Nested blockquotes are also possible.
+
+## Code
+
+Inline `code` example.
+
+```dart
+// Code block
+void main() {
+  print('Hello, Markdown!');
+}
+```
+
+## Horizontal Rule
+
+---
+
+## Tables
+
+| Header 1 | Header 2 | Header 3 |
+|----------|----------|----------|
+| Row 1    | Data     | Data     |
+| Row 2    | Data     | Data     |
+
+## Mixed Formatting
+
+->### Centered heading with [**Bold Link**](https://example.com)<-
+
+- List item with [*italic link*](https://flutter.dev)
+- List item with **bold text** and `inline code`
+
+---
+
+Made with Flutter and FlexMarkdown
 ''',
       ),
     );

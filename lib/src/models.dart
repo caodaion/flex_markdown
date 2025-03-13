@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
@@ -12,8 +13,14 @@ class HeadingElement extends MarkdownElement {
   final int level; // 1-6 for h1-h6
   final String text;
   final TextAlign? textAlign;
+  final bool isCentered;
 
-  HeadingElement({required this.level, required this.text, this.textAlign});
+  HeadingElement({
+    required this.level,
+    required this.text,
+    this.textAlign,
+    this.isCentered = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,14 +47,23 @@ class HeadingElement extends MarkdownElement {
         break;
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
-        textAlign: textAlign,
-      ),
+    final headingText = Text(
+      text,
+      style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+      textAlign: textAlign ?? (isCentered ? TextAlign.center : null),
     );
+
+    return isCentered
+        ? Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            alignment: Alignment.center,
+            child: headingText,
+          )
+        : Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: headingText,
+          );
   }
 }
 
@@ -81,20 +97,17 @@ class LineBreakElement extends MarkdownElement {
 
 /// Represents a centered line element
 class CenterElement extends MarkdownElement {
-  final String text;
+  final MarkdownElement child;
 
-  CenterElement({required this.text});
+  CenterElement({required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 16.0),
-        textAlign: TextAlign.center,
-      ),
+      alignment: Alignment.center,
+      child: child.build(context),
     );
   }
 }
@@ -112,12 +125,14 @@ class TextSpanElement {
   final bool isBold;
   final bool isItalic;
   final String? linkUrl;
+  final bool isCode; // Added isCode property
 
   TextSpanElement({
     required this.text,
     required this.isBold,
     required this.isItalic,
     this.linkUrl,
+    this.isCode = false, // Default is not code
   });
 }
 
@@ -140,6 +155,8 @@ class FormattedTextElement extends MarkdownElement {
               color: span.linkUrl != null ? const Color(0xFF2196F3) : null,
               decoration:
                   span.linkUrl != null ? TextDecoration.underline : null,
+              fontFamily: span.isCode ? 'monospace' : null,
+              backgroundColor: span.isCode ? Colors.grey.shade200 : null,
             ),
             recognizer: span.linkUrl != null
                 ? (TapGestureRecognizer()
@@ -191,6 +208,158 @@ class LinkElement extends MarkdownElement {
               }
             }
           },
+      ),
+    );
+  }
+}
+
+/// Represents an unordered list element
+class UnorderedListElement extends MarkdownElement {
+  final List<ListItemElement> items;
+
+  UnorderedListElement({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: items.map((item) => item.build(context)).toList(),
+    );
+  }
+}
+
+/// Represents an ordered list element
+class OrderedListElement extends MarkdownElement {
+  final List<ListItemElement> items;
+
+  OrderedListElement({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: List.generate(items.length, (index) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 24,
+              child: Text(
+                '${index + 1}.',
+                style: const TextStyle(fontSize: 16.0),
+              ),
+            ),
+            Expanded(child: items[index].buildContent(context)),
+          ],
+        );
+      }),
+    );
+  }
+}
+
+/// Represents a list item element
+class ListItemElement extends MarkdownElement {
+  final MarkdownElement content;
+  final List<ListItemElement>? nestedItems;
+  final bool isUnordered;
+  final int depth;
+
+  ListItemElement({
+    required this.content,
+    this.nestedItems,
+    this.isUnordered = true,
+    this.depth = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 24,
+          child: Text(
+            isUnordered ? '•' : '', // Bullet for unordered lists
+            style: const TextStyle(fontSize: 16.0),
+          ),
+        ),
+        Expanded(child: buildContent(context)),
+      ],
+    );
+  }
+
+  Widget buildContent(BuildContext context) {
+    if (nestedItems == null || nestedItems!.isEmpty) {
+      return content.build(context);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        content.build(context),
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: nestedItems!.map((item) => item.build(context)).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Represents a blockquote element
+class BlockquoteElement extends MarkdownElement {
+  final List<MarkdownElement> children;
+
+  BlockquoteElement({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        border: Border(
+          left: BorderSide(
+            color: Colors.grey.shade400,
+            width: 4.0,
+          ),
+        ),
+        color: Colors.grey.shade100,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children.map((child) => child.build(context)).toList(),
+      ),
+    );
+  }
+}
+
+/// Represents a code block element
+class CodeBlockElement extends MarkdownElement {
+  final String code;
+  final String? language;
+
+  CodeBlockElement({required this.code, this.language});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4.0),
+        color: Colors.grey.shade100,
+      ),
+      child: Text(
+        code,
+        style: const TextStyle(
+          fontFamily: 'monospace',
+          fontSize: 14.0,
+        ),
       ),
     );
   }
