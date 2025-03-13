@@ -365,32 +365,77 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
               onPressed: _applyHorizontalRule,
             ),
 
-            // Form element buttons
+            // Form element dropdown menu
             const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.text_fields),
-              tooltip: 'Inline Text Field',
-              onPressed: _applyTextField,
-            ),
-            IconButton(
-              icon: const Icon(Icons.check_box),
-              tooltip: 'Inline Checkbox',
-              onPressed: _applyCheckbox,
-            ),
-            IconButton(
-              icon: const Icon(Icons.radio_button_checked),
-              tooltip: 'Inline Radio Button',
-              onPressed: _applyRadio,
-            ),
-            IconButton(
-              icon: const Icon(Icons.arrow_drop_down_circle),
-              tooltip: 'Inline Dropdown',
-              onPressed: _applySelect,
+            PopupMenuButton<String>(
+              tooltip: 'Form Fields',
+              icon: const Icon(Icons.input),
+              onSelected: _applyFormField,
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'textfield',
+                  child: Row(
+                    children: [
+                      Icon(Icons.text_fields, size: 20),
+                      SizedBox(width: 8),
+                      Text('Text Field'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'checkbox',
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_box, size: 20),
+                      SizedBox(width: 8),
+                      Text('Checkbox'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'radio',
+                  child: Row(
+                    children: [
+                      Icon(Icons.radio_button_checked, size: 20),
+                      SizedBox(width: 8),
+                      Text('Radio Button'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'select',
+                  child: Row(
+                    children: [
+                      Icon(Icons.arrow_drop_down_circle, size: 20),
+                      SizedBox(width: 8),
+                      Text('Dropdown'),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  // Add a method to handle form field selection
+  void _applyFormField(String fieldType) {
+    switch (fieldType) {
+      case 'textfield':
+        _applyTextField();
+        break;
+      case 'checkbox':
+        _applyCheckbox();
+        break;
+      case 'radio':
+        _applyRadio();
+        break;
+      case 'select':
+        _applySelect();
+        break;
+    }
   }
 
   Widget _buildMarkdownPreview() {
