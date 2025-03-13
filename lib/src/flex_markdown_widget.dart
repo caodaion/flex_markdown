@@ -6,12 +6,14 @@ class FlexMarkdownWidget extends StatefulWidget {
   final String? data;
   final bool isHorizontalLayout;
   final bool showTextField;
+  final bool enableTextSelection;
 
   const FlexMarkdownWidget({
     Key? key,
     this.data,
     this.isHorizontalLayout = true,
     this.showTextField = true,
+    this.enableTextSelection = true,
   }) : super(key: key);
 
   @override
@@ -61,21 +63,26 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   }
 
   Widget _buildMarkdownPreview() {
-    return Expanded(
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: _elements.map((element) {
-            try {
-              return element.build(context);
-            } catch (e) {
-              // Handle element building errors gracefully
-              return Text('Error rendering element: ${e.toString()}');
-            }
-          }).toList(),
-        ),
+    Widget content = SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: _elements.map((element) {
+          try {
+            return element.build(context);
+          } catch (e) {
+            // Handle element building errors gracefully
+            return Text('Error rendering element: ${e.toString()}');
+          }
+        }).toList(),
       ),
     );
+
+    // Wrap with SelectionArea if text selection is enabled
+    if (widget.enableTextSelection) {
+      content = SelectionArea(child: content);
+    }
+
+    return Expanded(child: content);
   }
 
   Widget _buildTextField() {
