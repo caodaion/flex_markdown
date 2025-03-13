@@ -8,6 +8,7 @@ class TextFieldElement extends FormElement {
   final bool isInline;
   final String? initialValue;
   final bool isPrintMode; // Add isPrintMode flag
+  late final TextEditingController _controller;
 
   TextFieldElement(
       {required super.id,
@@ -16,13 +17,16 @@ class TextFieldElement extends FormElement {
       this.isInline = false,
       this.initialValue,
       super.onValueChanged,
-      this.isPrintMode = false}); // Default to false
+      this.isPrintMode = false}) {
+    _controller = TextEditingController(text: initialValue);
+  }
 
   @override
   Widget build(BuildContext context) {
     // In print mode, just show the value as text
     if (isPrintMode) {
-      return Text(initialValue ?? '', style: TextStyle(fontSize: 16.0));
+      return Text(_controller.text,
+          style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
     }
 
     if (isInline) {
@@ -31,9 +35,7 @@ class TextFieldElement extends FormElement {
           height: 36,
           margin: const EdgeInsets.symmetric(horizontal: 4),
           child: TextField(
-            controller: initialValue != null
-                ? TextEditingController(text: initialValue)
-                : null,
+            controller: _controller,
             decoration: InputDecoration(
               hintText: hint,
               isDense: true,
@@ -55,9 +57,7 @@ class TextFieldElement extends FormElement {
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: IntrinsicWidth(
         child: TextField(
-          controller: initialValue != null
-              ? TextEditingController(text: initialValue)
-              : null,
+          controller: _controller,
           decoration: InputDecoration(
             labelText: label,
             hintText: hint,
@@ -100,7 +100,8 @@ class SelectElement extends FormElement {
   Widget build(BuildContext context) {
     // In print mode, just show the selected value as text
     if (isPrintMode) {
-      return Text(initialValue ?? '', style: TextStyle(fontSize: 16.0));
+      return Text(initialValue ?? '',
+          style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
     }
 
     if (isInline) {
@@ -188,7 +189,8 @@ class CheckboxElement extends FormElement {
     // In print mode, show only the label if checked
     if (isPrintMode) {
       return initialValue
-          ? Text(label, style: TextStyle(fontSize: 16.0))
+          ? Text(label,
+              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold))
           : SizedBox.shrink(); // Hide if not checked
     }
 
@@ -256,7 +258,8 @@ class RadioElement extends FormElement {
     // In print mode, show only the label if selected
     if (isPrintMode) {
       return selected
-          ? Text(label, style: TextStyle(fontSize: 16.0))
+          ? Text(label,
+              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold))
           : SizedBox.shrink(); // Hide if not selected
     }
 
