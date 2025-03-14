@@ -213,94 +213,99 @@ Built with Flutter and FlexMarkdown.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: FlexMarkdownWidget(
-        // Required parameter
-        data: markdownData,
-        // Optional parameters
-        isHorizontalLayout: true,
-        showTextField: true,
-        showController: true,
-        enableTextSelection: true,
-        isPrintMode: false,
-        controllerPosition: MarkdownControllerPosition.above,
-        baseFontSize: 16.0,
-        formFieldConfigurations: {
-          'name_field': TextFieldConfiguration(
-            id: 'name_field',
-            label: 'Name',
-            placeholder: 'Enter your full name',
-            placeholderDots: 40,
-            onValueChanged:
-                (id, value, [fieldType]) => log(
-                  'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            FlexMarkdownWidget(
+              // Required parameter
+              data: markdownData,
+              // Optional parameters
+              isHorizontalLayout: true,
+              showTextField: true,
+              showController: true,
+              enableTextSelection: true,
+              isPrintMode: false,
+              controllerPosition: MarkdownControllerPosition.above,
+              baseFontSize: 16.0,
+              formFieldConfigurations: {
+                'name_field': TextFieldConfiguration(
+                  id: 'name_field',
+                  label: 'Name',
+                  placeholder: 'Enter your full name',
+                  placeholderDots: 40,
+                  onValueChanged:
+                      (id, value, [fieldType]) => log(
+                        'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                      ),
                 ),
-          ),
-          'terms_check': CheckboxConfiguration(
-            id: 'terms_check',
-            label: 'I agree to the terms and conditions',
-            defaultValue: true,
-            onValueChanged:
-                (id, value, [fieldType]) => log(
-                  'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                'terms_check': CheckboxConfiguration(
+                  id: 'terms_check',
+                  label: 'I agree to the terms and conditions',
+                  defaultValue: true,
+                  onValueChanged:
+                      (id, value, [fieldType]) => log(
+                        'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                      ),
                 ),
-          ),
-          'country': SelectConfiguration(
-            id: 'country',
-            label: 'Country I live in',
-            options: [
-              'Vietnam',
-              'Thailand',
-              'Laos',
-              'Cambodia',
-              'Singapore',
-              'Malaysia',
-              'Japan',
-            ],
-            defaultValue: 'Vietnam',
-            onValueChanged:
-                (id, value, [fieldType]) => log(
-                  'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                'country': SelectConfiguration(
+                  id: 'country',
+                  label: 'Country I live in',
+                  options: [
+                    'Vietnam',
+                    'Thailand',
+                    'Laos',
+                    'Cambodia',
+                    'Singapore',
+                    'Malaysia',
+                    'Japan',
+                  ],
+                  defaultValue: 'Vietnam',
+                  onValueChanged:
+                      (id, value, [fieldType]) => log(
+                        'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                      ),
                 ),
-          ),
-          'option1': RadioConfiguration(
-            id: 'option1',
-            label: 'Option 1',
-            groupName: 'group1',
-            defaultSelected: true,
-            onValueChanged:
-                (id, value, [fieldType]) => log(
-                  'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                'option1': RadioConfiguration(
+                  id: 'option1',
+                  label: 'Option 1',
+                  groupName: 'group1',
+                  defaultSelected: true,
+                  onValueChanged:
+                      (id, value, [fieldType]) => log(
+                        'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                      ),
                 ),
-          ),
-          'option2': RadioConfiguration(
-            id: 'option2',
-            label: 'Option 22',
-            groupName: 'group1',
-            onValueChanged:
-                (id, value, [fieldType]) => log(
-                  'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                'option2': RadioConfiguration(
+                  id: 'option2',
+                  label: 'Option 22',
+                  groupName: 'group1',
+                  onValueChanged:
+                      (id, value, [fieldType]) => log(
+                        'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                      ),
                 ),
-          ),
-          'inline_field': TextFieldConfiguration(
-            id: 'inline_field',
-            label: 'Inline text field',
-            defaultValue: 'example',
-            onValueChanged:
-                (id, value, [fieldType]) => log(
-                  'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                'inline_field': TextFieldConfiguration(
+                  id: 'inline_field',
+                  label: 'Inline text field',
+                  defaultValue: 'example',
+                  onValueChanged:
+                      (id, value, [fieldType]) => log(
+                        'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                      ),
                 ),
-          ),
-          'inline_check': CheckboxConfiguration(
-            id: 'inline_check',
-            label: 'An inline checkbox',
-            defaultValue: true,
-            onValueChanged:
-                (id, value, [fieldType]) => log(
-                  'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                'inline_check': CheckboxConfiguration(
+                  id: 'inline_check',
+                  label: 'An inline checkbox',
+                  defaultValue: true,
+                  onValueChanged:
+                      (id, value, [fieldType]) => log(
+                        'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                      ),
                 ),
-          ),
-        },
-        minHeight: double.infinity,
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
