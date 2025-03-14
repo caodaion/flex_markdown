@@ -866,6 +866,9 @@ class FlexMarkdownParser {
     var triggerFormFieldPlaceholderDots = triggerFormConfig?.placeholderDots;
     var triggerFormFieldOptions = triggerFormConfig?.options;
     var triggerFormFieldOnValueChanged = triggerFormConfig?.onValueChanged;
+    var triggerFormFieldGroupName = triggerFormConfig?.groupName;
+    var triggerFormFieldSelected = triggerFormConfig?.selected;
+    var triggerFormFieldDefaultSelected = triggerFormConfig?.defaultSelected;
     switch (type) {
       case 'textfield':
         String label = triggerFormFieldLabel != null
@@ -975,14 +978,28 @@ class FlexMarkdownParser {
         );
 
       case 'radio':
-        String label = parts.length > 2 ? parts[2].trim() : '';
-        String groupName = parts.length > 3 ? parts[3].trim() : 'defaultGroup';
+        String label = triggerFormFieldLabel != null
+            ? triggerFormFieldLabel
+            : parts.length > 2
+                ? parts[2].trim()
+                : '';
+        String groupName = triggerFormFieldGroupName != null
+            ? triggerFormFieldGroupName
+            : parts.length > 3
+                ? parts[3].trim()
+                : 'defaultGroup';
         // Use formValues if available, otherwise use the default value (parts[4]) if provided
-        bool defaultSelected =
-            parts.length > 4 ? parts[4].trim() == 'true' : false;
-        bool selected = formValues != null && formValues.containsKey(groupName)
-            ? formValues[groupName] == id
-            : defaultSelected;
+        bool defaultSelected = triggerFormFieldDefaultSelected != null
+            ? triggerFormFieldDefaultSelected
+            : parts.length > 4
+                ? parts[4].trim() == 'true'
+                : false;
+        bool selected = triggerFormFieldSelected != null
+            ? triggerFormFieldSelected
+            : formValues != null && formValues.containsKey(groupName)
+                ? formValues[groupName] == id
+                : defaultSelected;
+
         // Add a placeholderDots parameter
         int? placeholderDots = parts.length > 5 && parts[5].trim().isNotEmpty
             ? int.tryParse(parts[5].trim())

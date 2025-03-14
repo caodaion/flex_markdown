@@ -108,7 +108,7 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
       // Only re-parse if we're in print mode OR if the element is not a text field
       bool isTextField = fieldType == 'textfield';
       if (_isPrintMode || !isTextField) {
-        _parseMarkdown();
+        // _parseMarkdown();
       }
     });
   }

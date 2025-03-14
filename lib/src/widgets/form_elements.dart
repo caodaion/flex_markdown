@@ -381,6 +381,7 @@ class RadioElement extends FormElement {
   final int?
       placeholderDots; // Number of dots to show in print mode when not selected
   FormValueChangedCallback? handleFormValueChanged;
+
   RadioElement(
       {required super.id,
       required this.label,

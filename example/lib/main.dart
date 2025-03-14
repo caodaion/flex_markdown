@@ -192,7 +192,7 @@ Here's a checkbox: {{checkbox|terms_check|I agree to the terms and conditions|fa
 
 ### Radio Buttons
 Choose one: 
-{{radio|option1|Option 1|group1|true}} 
+{{radio|option1|Option 1|group1|false}} 
 {{radio|option2|Option 2|group1|false}}
 {{radio|option3|Option 3|group1|false}}
 
@@ -257,6 +257,25 @@ Built with Flutter and FlexMarkdown.
               'Japan',
             ],
             defaultValue: 'Vietnam',
+            onValueChanged:
+                (id, value, [fieldType]) => log(
+                  'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                ),
+          ),
+          'option1': RadioConfiguration(
+            id: 'option1',
+            label: 'Option 1',
+            groupName: 'group1',
+            defaultSelected: true,
+            onValueChanged:
+                (id, value, [fieldType]) => log(
+                  'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                ),
+          ),
+          'option2': RadioConfiguration(
+            id: 'option2',
+            label: 'Option 22',
+            groupName: 'group1',
             onValueChanged:
                 (id, value, [fieldType]) => log(
                   'Field "$id" changed to "$value" (${fieldType ?? 'text'})',

@@ -11,6 +11,7 @@ abstract class FormFieldConfiguration {
   final List<String>? options;
   final String? groupName;
   final bool? selected;
+  final bool? defaultSelected;
   final bool? isInline;
   final FormValueChangedCallback? onValueChanged;
 
@@ -23,6 +24,7 @@ abstract class FormFieldConfiguration {
     this.options,
     this.groupName,
     this.selected,
+    this.defaultSelected,
     this.isInline,
     this.onValueChanged,
   });
