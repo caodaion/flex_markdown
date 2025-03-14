@@ -71,13 +71,14 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     const markdownData = '''
-# Markdown Demo
+# Flex Markdown Demo
 
 ## Basic Typography
 
 Regular paragraph text. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 
 **Bold text** and *italic text* with ***bold and italic*** combinations.
+Inline `code` with backticks.
 
 ## Headings
 
@@ -98,10 +99,6 @@ Regular paragraph text. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 
 [Basic link](https://flutter.dev)
 
-[**Bold link**](https://flutter.dev)
-
-[*Italic link*](https://flutter.dev)
-
 ## Lists
 
 ### Unordered List
@@ -114,6 +111,8 @@ Regular paragraph text. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 ### Ordered List
 1. First item
 2. Second item
+   1. Nested item 2.1
+   2. Nested item 2.2
 3. Third item
 
 ## Blockquotes
@@ -122,7 +121,7 @@ Regular paragraph text. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 > 
 > Multiple paragraphs can be included.
 >
-> Nested blockquotes are also possible.
+> Nested blockquotes are possible too.
 
 ## Code
 
@@ -131,7 +130,7 @@ Inline `code` example.
 ```dart
 // Code block
 void main() {
-  print('Hello, Markdown!');
+  print('Hello, Flex Markdown!');
 }
 ```
 
@@ -145,6 +144,10 @@ void main() {
 |----------|----------|----------|
 | Row 1    | Data     | Data     |
 | Row 2    | Data     | Data     |
+
+## Indented Content
+
+[[indent|20|This text is indented by 20 pixels from the left margin.]]
 
 ## Mixed Formatting
 
@@ -168,7 +171,7 @@ Choose one:
 {{radio|option3|Option 3|group1|false}}
 
 ### Dropdown Select
-Select your country: {{select|country|Country|USA,Canada,Mexico,UK,Australia,Japan}} and it should be a required field.
+Select your country: {{select|country|Country|USA,Canada,Mexico,UK,Australia,Japan}}
 
 ### Mixed Forms in Paragraph
 This paragraph contains {{textfield|inline_field|inline text field|example}} and also 
@@ -176,22 +179,12 @@ This paragraph contains {{textfield|inline_field|inline text field|example}} and
 
 ---
 
-Made with Flutter and FlexMarkdown
+Built with Flutter and FlexMarkdown.
 ''';
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: FlexMarkdownWidget(
@@ -201,12 +194,7 @@ Made with Flutter and FlexMarkdown
         enableTextSelection: true,
         isPrintMode: false,
         controllerPosition: MarkdownControllerPosition.above,
-        data: '''
-->**ĐẠI ĐẠO TAM KỲ PHỔ ĐỘ**<-
-->Đệ {{textfield|namDao|Năm Đạo|nhứt bá||24}} niên<-
-->Tam Giáo Quy Nguyên Ngũ Chi Hiệp Nhứt<-
-[[indent|20|Thời duy thiên vận {{textfield|namAL|Năm Âm Lịch|Ất Tỵ||36}} niên {{textfield|thangAL|Tháng Âm Lịch|nhị||36}} ngoạt]]
-''',
+        data: markdownData,
       ),
     );
   }

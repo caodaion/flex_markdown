@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models.dart';
 
+// Default minimum width for form fields
+const double kDefaultFormFieldMinWidth = 120.0;
+
 /// Text field input element
 class TextFieldElement extends FormElement {
   final String label;
@@ -42,6 +45,8 @@ class TextFieldElement extends FormElement {
         child: Container(
           height: 36,
           margin: const EdgeInsets.symmetric(horizontal: 4),
+          constraints:
+              const BoxConstraints(minWidth: kDefaultFormFieldMinWidth),
           child: TextField(
             controller: _controller,
             textAlignVertical: TextAlignVertical.center,
@@ -65,23 +70,27 @@ class TextFieldElement extends FormElement {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: IntrinsicWidth(
-        child: TextField(
-          controller: _controller,
-          decoration: InputDecoration(
-            labelText: label,
-            hintText: hint,
-            border: const OutlineInputBorder(),
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 8,
+        child: Container(
+          constraints:
+              const BoxConstraints(minWidth: kDefaultFormFieldMinWidth),
+          child: TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              labelText: label,
+              hintText: hint,
+              border: const OutlineInputBorder(),
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
             ),
+            onChanged: (value) {
+              if (onValueChanged != null) {
+                onValueChanged!(id, value);
+              }
+            },
           ),
-          onChanged: (value) {
-            if (onValueChanged != null) {
-              onValueChanged!(id, value);
-            }
-          },
         ),
       ),
     );
@@ -125,6 +134,7 @@ class SelectElement extends FormElement {
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
         height: 36,
+        constraints: const BoxConstraints(minWidth: kDefaultFormFieldMinWidth),
         child: DropdownButtonHideUnderline(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -155,6 +165,7 @@ class SelectElement extends FormElement {
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
+      constraints: const BoxConstraints(minWidth: kDefaultFormFieldMinWidth),
       child: IntrinsicWidth(
         child: DropdownButtonFormField<String>(
           value: initialValue,
