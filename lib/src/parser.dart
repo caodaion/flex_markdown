@@ -382,8 +382,14 @@ class FlexMarkdownParser {
         text.contains('*') ||
         text.contains('_') ||
         text.contains('`') ||
+        text.contains('{color:') || // Add check for color syntax
         (text.contains('[') && text.contains(']') && text.contains('(')))) {
       return ParagraphElement(text: text);
+    }
+
+    // Process color formatting first, separately from other formatting
+    if (text.contains('{color:')) {
+      return _processColorFormatting(text);
     }
 
     // Process bold, italic, code, and link formatting
@@ -582,6 +588,67 @@ class FlexMarkdownParser {
           currentPos = closeCodePos + 1;
           continue;
         }
+      }
+    }
+
+    return FormattedTextElement(spans: spans);
+  }
+
+  /// Process text with color formatting
+  static MarkdownElement _processColorFormatting(String text) {
+    List<TextSpanElement> spans = [];
+    int currentPos = 0;
+
+    while (currentPos < text.length) {
+      int colorStartPos = text.indexOf('{color:', currentPos);
+
+      if (colorStartPos == -1) {
+        // No more color formatting, add the rest as plain text
+        if (currentPos < text.length) {
+          spans.add(TextSpanElement(
+            text: text.substring(currentPos),
+            isBold: false,
+            isItalic: false,
+          ));
+        }
+        break;
+      }
+
+      // Add text before the color marker as plain text
+      if (colorStartPos > currentPos) {
+        spans.add(TextSpanElement(
+          text: text.substring(currentPos, colorStartPos),
+          isBold: false,
+          isItalic: false,
+        ));
+      }
+
+      int colorSeparatorPos = text.indexOf('|', colorStartPos);
+      int colorEndPos = text.indexOf('}', colorStartPos);
+
+      if (colorSeparatorPos != -1 &&
+          colorEndPos != -1 &&
+          colorSeparatorPos < colorEndPos) {
+        String colorValue =
+            text.substring(colorStartPos + 7, colorSeparatorPos);
+        String coloredText = text.substring(colorSeparatorPos + 1, colorEndPos);
+
+        spans.add(TextSpanElement(
+          text: coloredText,
+          isBold: false,
+          isItalic: false,
+          color: colorValue,
+        ));
+
+        currentPos = colorEndPos + 1;
+      } else {
+        // Invalid color format, treat as regular text
+        spans.add(TextSpanElement(
+          text: text.substring(colorStartPos, colorStartPos + 7),
+          isBold: false,
+          isItalic: false,
+        ));
+        currentPos = colorStartPos + 7;
       }
     }
 

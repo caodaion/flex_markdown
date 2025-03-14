@@ -140,14 +140,16 @@ class TextSpanElement {
   final bool isBold;
   final bool isItalic;
   final String? linkUrl;
-  final bool isCode; // Added isCode property
+  final bool isCode;
+  final String? color; // Add color property
 
   TextSpanElement({
     required this.text,
     required this.isBold,
     required this.isItalic,
     this.linkUrl,
-    this.isCode = false, // Default is not code
+    this.isCode = false,
+    this.color, // Add color parameter
   });
 }
 
@@ -162,29 +164,70 @@ class FormattedTextElement extends MarkdownElement {
     return Text.rich(
       TextSpan(
         children: spans.map((span) {
+          Color? textColor;
+          if (span.color != null) {
+            // Parse color from string
+            try {
+              // Handle common color names
+              switch (span.color!.toLowerCase()) {
+                case 'red':
+                  textColor = Colors.red;
+                  break;
+                case 'blue':
+                  textColor = Colors.blue;
+                  break;
+                case 'green':
+                  textColor = Colors.green;
+                  break;
+                case 'yellow':
+                  textColor = Colors.yellow;
+                  break;
+                case 'orange':
+                  textColor = Colors.orange;
+                  break;
+                case 'purple':
+                  textColor = Colors.purple;
+                  break;
+                case 'black':
+                  textColor = Colors.black;
+                  break;
+                case 'white':
+                  textColor = Colors.white;
+                  break;
+                case 'grey':
+                case 'gray':
+                  textColor = Colors.grey;
+                  break;
+                default:
+                  // Check for hex color format
+                  if (span.color!.startsWith('#')) {
+                    String hex = span.color!.replaceFirst('#', '');
+                    if (hex.length == 6 || hex.length == 8) {
+                      textColor =
+                          Color(int.parse('0xFF' + hex.substring(0, 6)));
+                    }
+                  }
+              }
+            } catch (e) {
+              // If color parsing fails, don't apply a color
+            }
+          }
+
           return TextSpan(
             text: span.text,
             style: TextStyle(
               fontWeight: span.isBold ? FontWeight.bold : FontWeight.normal,
               fontStyle: span.isItalic ? FontStyle.italic : FontStyle.normal,
-              color: span.linkUrl != null ? const Color(0xFF2196F3) : null,
               decoration:
                   span.linkUrl != null ? TextDecoration.underline : null,
               fontFamily: span.isCode ? 'monospace' : null,
               backgroundColor: span.isCode ? Colors.grey.shade200 : null,
+              color: textColor, // Apply the parsed color
             ),
             recognizer: span.linkUrl != null
                 ? (TapGestureRecognizer()
-                  ..onTap = () async {
-                    try {
-                      // Try to launch using the older API
-                      await url_launcher.launch(span.linkUrl!);
-                    } catch (e) {
-                      // If the older API fails, try with the newer API if available
-                      if (await url_launcher.canLaunch(span.linkUrl!)) {
-                        await url_launcher.launch(span.linkUrl!);
-                      }
-                    }
+                  ..onTap = () {
+                    url_launcher.launch(span.linkUrl!);
                   })
                 : null,
           );
