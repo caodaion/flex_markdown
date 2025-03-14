@@ -1,3 +1,4 @@
+import 'package:flex_markdown/flex_markdown.dart';
 import 'package:flutter/material.dart';
 
 /// Base class for all form field configurations
@@ -11,6 +12,7 @@ abstract class FormFieldConfiguration {
   final String? groupName;
   final bool? selected;
   final bool? isInline;
+  final FormValueChangedCallback? onValueChanged;
 
   const FormFieldConfiguration({
     required this.id,
@@ -22,6 +24,7 @@ abstract class FormFieldConfiguration {
     this.groupName,
     this.selected,
     this.isInline,
+    this.onValueChanged,
   });
 }
 
@@ -33,6 +36,7 @@ class TextFieldConfiguration extends FormFieldConfiguration {
   final TextInputType? keyboardType;
   final bool obscureText;
   final TextCapitalization textCapitalization;
+  final FormValueChangedCallback? onValueChanged;
 
   const TextFieldConfiguration({
     required String id,
@@ -45,6 +49,7 @@ class TextFieldConfiguration extends FormFieldConfiguration {
     this.keyboardType,
     this.obscureText = false,
     this.textCapitalization = TextCapitalization.none,
+    this.onValueChanged,
   }) : super(
             id: id,
             label: label,
@@ -55,6 +60,7 @@ class TextFieldConfiguration extends FormFieldConfiguration {
 /// Configuration for checkbox form elements
 class CheckboxConfiguration extends FormFieldConfiguration {
   final bool defaultValue;
+  final FormValueChangedCallback? onValueChanged;
 
   const CheckboxConfiguration({
     required String id,
@@ -62,6 +68,7 @@ class CheckboxConfiguration extends FormFieldConfiguration {
     this.defaultValue = false,
     double? width,
     int? placeholderDots,
+    this.onValueChanged,
   }) : super(
             id: id,
             label: label,
@@ -73,6 +80,7 @@ class CheckboxConfiguration extends FormFieldConfiguration {
 class RadioConfiguration extends FormFieldConfiguration {
   final String groupName;
   final bool defaultSelected;
+  final FormValueChangedCallback? onValueChanged;
 
   const RadioConfiguration({
     required String id,
@@ -81,6 +89,7 @@ class RadioConfiguration extends FormFieldConfiguration {
     this.defaultSelected = false,
     double? width,
     int? placeholderDots,
+    this.onValueChanged,
   }) : super(
             id: id,
             label: label,
@@ -92,6 +101,7 @@ class RadioConfiguration extends FormFieldConfiguration {
 class SelectConfiguration extends FormFieldConfiguration {
   final List<String> options;
   final String? defaultValue;
+  final FormValueChangedCallback? onValueChanged;
 
   const SelectConfiguration({
     required String id,
@@ -100,6 +110,7 @@ class SelectConfiguration extends FormFieldConfiguration {
     this.defaultValue,
     double? width,
     int? placeholderDots,
+    this.onValueChanged,
   }) : super(
             id: id,
             label: label,

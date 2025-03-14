@@ -13,6 +13,7 @@ class TextFieldElement extends FormElement {
   final bool isPrintMode; // Add isPrintMode flag
   final int? placeholderDots; // Number of dots to show in print mode when empty
   late final TextEditingController _controller;
+  FormValueChangedCallback? handleFormValueChanged;
 
   TextFieldElement(
       {required super.id,
@@ -21,6 +22,7 @@ class TextFieldElement extends FormElement {
       this.isInline = false,
       this.initialValue,
       super.onValueChanged,
+      this.handleFormValueChanged,
       this.isPrintMode = false,
       this.placeholderDots}) {
     _controller = TextEditingController(text: initialValue);
@@ -59,6 +61,7 @@ class TextFieldElement extends FormElement {
             ),
             onChanged: (value) {
               if (onValueChanged != null) {
+                handleFormValueChanged!(id, value, 'textfield');
                 onValueChanged!(id, value, 'textfield');
               }
             },
@@ -87,6 +90,7 @@ class TextFieldElement extends FormElement {
             ),
             onChanged: (value) {
               if (onValueChanged != null) {
+                handleFormValueChanged!(id, value);
                 onValueChanged!(id, value);
               }
             },
@@ -109,6 +113,7 @@ class TextFieldFormElement extends FormElement {
   final TextInputType? keyboardType;
   final bool obscureText;
   final TextCapitalization textCapitalization;
+  FormValueChangedCallback? handleFormValueChanged;
 
   TextFieldFormElement({
     required String id,
@@ -116,6 +121,7 @@ class TextFieldFormElement extends FormElement {
     this.placeholder,
     this.value,
     this.width,
+    FormValueChangedCallback? handleFormValueChanged,
     FormValueChangedCallback? onValueChanged,
     this.isPrintMode = false,
     this.placeholderDots,
@@ -173,6 +179,7 @@ class TextFieldFormElement extends FormElement {
             textCapitalization: textCapitalization,
             onChanged: (newValue) {
               if (onValueChanged != null) {
+                handleFormValueChanged!(id, newValue, 'textfield');
                 onValueChanged!(id, newValue, 'textfield');
               }
             },
@@ -191,7 +198,7 @@ class SelectElement extends FormElement {
   final String? initialValue;
   final bool isPrintMode; // Add isPrintMode flag
   final int? placeholderDots; // Number of dots to show in print mode when empty
-
+  FormValueChangedCallback? handleFormValueChanged;
   SelectElement(
       {required super.id,
       required this.label,
@@ -199,6 +206,7 @@ class SelectElement extends FormElement {
       this.isInline = false,
       this.initialValue,
       super.onValueChanged,
+      this.handleFormValueChanged,
       this.isPrintMode = false,
       this.placeholderDots}); // Add placeholderDots parameter
 
@@ -240,6 +248,7 @@ class SelectElement extends FormElement {
                   .toList(),
               onChanged: (value) {
                 if (value != null && onValueChanged != null) {
+                  handleFormValueChanged!(id, value);
                   onValueChanged!(id, value);
                 }
               },
@@ -274,6 +283,7 @@ class SelectElement extends FormElement {
               .toList(),
           onChanged: (value) {
             if (value != null && onValueChanged != null) {
+              handleFormValueChanged!(id, value);
               onValueChanged!(id, value);
             }
           },
@@ -291,13 +301,14 @@ class CheckboxElement extends FormElement {
   final bool isPrintMode; // Add isPrintMode flag
   final int?
       placeholderDots; // Number of dots to show in print mode when not checked
-
+  FormValueChangedCallback? handleFormValueChanged;
   CheckboxElement(
       {required super.id,
       required this.label,
       this.initialValue = false,
       this.isInline = false,
       super.onValueChanged,
+      this.handleFormValueChanged,
       this.isPrintMode = false,
       this.placeholderDots}); // Add placeholderDots parameter
 
@@ -330,6 +341,7 @@ class CheckboxElement extends FormElement {
                   value: initialValue,
                   onChanged: (value) {
                     if (value != null && onValueChanged != null) {
+                      handleFormValueChanged!(id, value);
                       onValueChanged!(id, value);
                     }
                   },
@@ -351,6 +363,7 @@ class CheckboxElement extends FormElement {
       dense: true,
       onChanged: (bool? value) {
         if (value != null && onValueChanged != null) {
+          handleFormValueChanged!(id, value);
           onValueChanged!(id, value);
         }
       },
@@ -367,7 +380,7 @@ class RadioElement extends FormElement {
   final bool isPrintMode; // Add isPrintMode flag
   final int?
       placeholderDots; // Number of dots to show in print mode when not selected
-
+  FormValueChangedCallback? handleFormValueChanged;
   RadioElement(
       {required super.id,
       required this.label,
@@ -375,6 +388,7 @@ class RadioElement extends FormElement {
       this.selected = false,
       this.isInline = false,
       super.onValueChanged,
+      this.handleFormValueChanged,
       this.isPrintMode = false,
       this.placeholderDots}); // Add placeholderDots parameter
 
@@ -408,6 +422,7 @@ class RadioElement extends FormElement {
                   groupValue: selected ? id : null,
                   onChanged: (value) {
                     if (value != null && onValueChanged != null) {
+                      handleFormValueChanged!(id, value);
                       onValueChanged!(groupName, id);
                     }
                   },
@@ -429,6 +444,7 @@ class RadioElement extends FormElement {
       contentPadding: EdgeInsets.zero,
       onChanged: (value) {
         if (value != null && onValueChanged != null) {
+          handleFormValueChanged!(id, value);
           onValueChanged!(groupName, id);
         }
       },

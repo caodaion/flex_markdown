@@ -84,7 +84,7 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
       _elements = FlexMarkdownParser.parse(
         _currentData,
         formValues: _formValues,
-        onValueChanged: _handleFormValueChanged,
+        handleFormValueChanged: _handleFormValueChanged,
         isPrintMode: _isPrintMode,
         baseFontSize: _baseFontSize,
         formFieldConfigurations:

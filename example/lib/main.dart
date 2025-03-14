@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flex_markdown/flex_markdown.dart';
 import 'package:flutter/material.dart';
 
@@ -228,11 +230,19 @@ Built with Flutter and FlexMarkdown.
             label: 'Name',
             placeholder: 'Enter your full name',
             placeholderDots: 40,
+            onValueChanged:
+                (id, value, [fieldType]) => log(
+                  'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                ),
           ),
           'terms_check': CheckboxConfiguration(
             id: 'terms_check',
             label: 'I agree to the terms and conditions',
             defaultValue: true,
+            onValueChanged:
+                (id, value, [fieldType]) => log(
+                  'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                ),
           ),
           'country': SelectConfiguration(
             id: 'country',
@@ -247,16 +257,28 @@ Built with Flutter and FlexMarkdown.
               'Japan',
             ],
             defaultValue: 'Vietnam',
+            onValueChanged:
+                (id, value, [fieldType]) => log(
+                  'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                ),
           ),
           'inline_field': TextFieldConfiguration(
             id: 'inline_field',
             label: 'Inline text field',
             defaultValue: 'example',
+            onValueChanged:
+                (id, value, [fieldType]) => log(
+                  'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                ),
           ),
           'inline_check': CheckboxConfiguration(
             id: 'inline_check',
             label: 'An inline checkbox',
             defaultValue: true,
+            onValueChanged:
+                (id, value, [fieldType]) => log(
+                  'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
+                ),
           ),
         },
       ),

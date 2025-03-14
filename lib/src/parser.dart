@@ -9,7 +9,7 @@ class FlexMarkdownParser {
   /// Parse markdown string into a list of MarkdownElement objects
   static List<MarkdownElement> parse(String markdown,
       {Map<String, dynamic>? formValues,
-      FormValueChangedCallback? onValueChanged,
+      FormValueChangedCallback? handleFormValueChanged,
       bool isPrintMode = false,
       double baseFontSize = 16.0,
       Map<String, FormFieldConfiguration>? formFieldConfigurations}) {
@@ -51,7 +51,7 @@ class FlexMarkdownParser {
         if (content.contains('{{') && content.contains('}}')) {
           // Process as mixed content to handle form elements within indented blocks
           MarkdownElement mixedContent = _processMixedContent(content,
-              onValueChanged: onValueChanged,
+              handleFormValueChanged: handleFormValueChanged,
               formValues: formValues,
               isPrintMode: isPrintMode,
               baseFontSize: baseFontSize,
@@ -329,7 +329,7 @@ class FlexMarkdownParser {
         if (innerText.contains('{{') && innerText.contains('}}')) {
           // Process as mixed content
           MarkdownElement mixedContent = _processMixedContent(innerText,
-              onValueChanged: onValueChanged,
+              handleFormValueChanged: handleFormValueChanged,
               formValues: formValues,
               isPrintMode: isPrintMode,
               baseFontSize: baseFontSize,
@@ -352,13 +352,13 @@ class FlexMarkdownParser {
           // Standalone form element (existing behavior)
           String formContent = _extractBetween(line, '{{', '}}');
           elements.add(_parseFormElement(formContent,
-              onValueChanged: onValueChanged,
+              handleFormValueChanged: handleFormValueChanged,
               formValues: formValues,
               isPrintMode: isPrintMode)); // Pass isPrintMode
         } else {
           // Inline form element - process as mixed content
           elements.add(_processMixedContent(line,
-              onValueChanged: onValueChanged,
+              handleFormValueChanged: handleFormValueChanged,
               formValues: formValues,
               isPrintMode: isPrintMode,
               baseFontSize: baseFontSize,
@@ -758,7 +758,7 @@ class FlexMarkdownParser {
   /// Process text with potentially inline form elements
   static MarkdownElement _processMixedContent(String text,
       {Map<String, dynamic>? formValues,
-      FormValueChangedCallback? onValueChanged,
+      FormValueChangedCallback? handleFormValueChanged,
       bool isPrintMode = false,
       double baseFontSize = 16.0,
       Map<String, FormFieldConfiguration>? formFieldConfigurations}) {
@@ -809,7 +809,7 @@ class FlexMarkdownParser {
       elements.add(_parseFormElement(formContent,
           isInline: true,
           formValues: formValues,
-          onValueChanged: onValueChanged,
+          handleFormValueChanged: handleFormValueChanged,
           isPrintMode: isPrintMode,
           formFieldConfigurations:
               formFieldConfigurations)); // Pass formFieldConfigurations
@@ -847,7 +847,7 @@ class FlexMarkdownParser {
   static MarkdownElement _parseFormElement(String formContent,
       {bool isInline = false,
       Map<String, dynamic>? formValues,
-      FormValueChangedCallback? onValueChanged,
+      FormValueChangedCallback? handleFormValueChanged,
       bool isPrintMode = false,
       Map<String, FormFieldConfiguration>? formFieldConfigurations}) {
     // Add this parameter
@@ -865,6 +865,7 @@ class FlexMarkdownParser {
     var triggerFormFieldPlaceholder = triggerFormConfig?.placeholder;
     var triggerFormFieldPlaceholderDots = triggerFormConfig?.placeholderDots;
     var triggerFormFieldOptions = triggerFormConfig?.options;
+    var triggerFormFieldOnValueChanged = triggerFormConfig?.onValueChanged;
     switch (type) {
       case 'textfield':
         String label = triggerFormFieldLabel != null
@@ -895,7 +896,10 @@ class FlexMarkdownParser {
             hint: hint,
             initialValue: initialValue,
             isInline: isInline,
-            onValueChanged: onValueChanged,
+            handleFormValueChanged: handleFormValueChanged,
+            onValueChanged: triggerFormFieldOnValueChanged != null
+                ? triggerFormFieldOnValueChanged
+                : null,
             isPrintMode: isPrintMode,
             placeholderDots: placeholderDots); // Add placeholderDots parameter
 
@@ -931,7 +935,10 @@ class FlexMarkdownParser {
             options: options,
             initialValue: initialValue,
             isInline: isInline,
-            onValueChanged: onValueChanged,
+            handleFormValueChanged: handleFormValueChanged,
+            onValueChanged: triggerFormFieldOnValueChanged != null
+                ? triggerFormFieldOnValueChanged
+                : null,
             isPrintMode: isPrintMode,
             placeholderDots: placeholderDots); // Add placeholderDots parameter
 
@@ -959,7 +966,10 @@ class FlexMarkdownParser {
           label: label,
           initialValue: initialValue,
           isInline: isInline,
-          onValueChanged: onValueChanged,
+          handleFormValueChanged: handleFormValueChanged,
+          onValueChanged: triggerFormFieldOnValueChanged != null
+              ? triggerFormFieldOnValueChanged
+              : null,
           isPrintMode: isPrintMode,
           placeholderDots: placeholderDots, // Add placeholderDots parameter
         );
@@ -984,7 +994,10 @@ class FlexMarkdownParser {
           groupName: groupName,
           selected: selected,
           isInline: isInline,
-          onValueChanged: onValueChanged,
+          handleFormValueChanged: handleFormValueChanged,
+          onValueChanged: triggerFormFieldOnValueChanged != null
+              ? triggerFormFieldOnValueChanged
+              : null,
           isPrintMode: isPrintMode,
           placeholderDots: placeholderDots, // Add placeholderDots parameter
         );
