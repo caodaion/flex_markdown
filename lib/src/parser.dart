@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/widgets.dart';
 import 'models.dart';
 import 'widgets/form_elements.dart';
+import 'models/form_field_configurations.dart'; // Add this import
 
 class FlexMarkdownParser {
   /// Parse markdown string into a list of MarkdownElement objects
@@ -8,8 +11,9 @@ class FlexMarkdownParser {
       {Map<String, dynamic>? formValues,
       FormValueChangedCallback? onValueChanged,
       bool isPrintMode = false,
-      double baseFontSize = 16.0}) {
-    // Added baseFontSize parameter with default
+      double baseFontSize = 16.0,
+      Map<String, FormFieldConfiguration>? formFieldConfigurations}) {
+    // Add this parameter
 
     List<MarkdownElement> elements = [];
     List<String> lines = markdown.split('\n');
@@ -50,7 +54,9 @@ class FlexMarkdownParser {
               onValueChanged: onValueChanged,
               formValues: formValues,
               isPrintMode: isPrintMode,
-              baseFontSize: baseFontSize); // Pass base font size
+              baseFontSize: baseFontSize,
+              formFieldConfigurations:
+                  formFieldConfigurations); // Pass formFieldConfigurations
           elements.add(IndentElement(
             indentWidth: indentAmount,
             content: mixedContent,
@@ -326,7 +332,9 @@ class FlexMarkdownParser {
               onValueChanged: onValueChanged,
               formValues: formValues,
               isPrintMode: isPrintMode,
-              baseFontSize: baseFontSize); // Pass base font size
+              baseFontSize: baseFontSize,
+              formFieldConfigurations:
+                  formFieldConfigurations); // Pass formFieldConfigurations
           elements.add(CenterElement(child: mixedContent));
         } else {
           // Process inline formatting for the centered text (no form elements)
@@ -353,7 +361,9 @@ class FlexMarkdownParser {
               onValueChanged: onValueChanged,
               formValues: formValues,
               isPrintMode: isPrintMode,
-              baseFontSize: baseFontSize)); // Pass base font size
+              baseFontSize: baseFontSize,
+              formFieldConfigurations:
+                  formFieldConfigurations)); // Pass formFieldConfigurations
         }
         continue;
       }
@@ -750,7 +760,10 @@ class FlexMarkdownParser {
       {Map<String, dynamic>? formValues,
       FormValueChangedCallback? onValueChanged,
       bool isPrintMode = false,
-      double baseFontSize = 16.0}) {
+      double baseFontSize = 16.0,
+      Map<String, FormFieldConfiguration>? formFieldConfigurations}) {
+    // Add this parameter
+
     // Added isPrintMode parameter
     // If there are no form elements, process as regular text with formatting
     if (!text.contains('{{') || !text.contains('}}')) {
@@ -797,7 +810,9 @@ class FlexMarkdownParser {
           isInline: true,
           formValues: formValues,
           onValueChanged: onValueChanged,
-          isPrintMode: isPrintMode)); // Pass isPrintMode
+          isPrintMode: isPrintMode,
+          formFieldConfigurations:
+              formFieldConfigurations)); // Pass formFieldConfigurations
 
       // Move position after this form element
       currentPos = formEndPos + 2;
@@ -833,25 +848,46 @@ class FlexMarkdownParser {
       {bool isInline = false,
       Map<String, dynamic>? formValues,
       FormValueChangedCallback? onValueChanged,
-      bool isPrintMode = false}) {
+      bool isPrintMode = false,
+      Map<String, FormFieldConfiguration>? formFieldConfigurations}) {
+    // Add this parameter
+
     // Added isPrintMode parameter
     List<String> parts = formContent.split('|');
     String type = parts[0].trim().toLowerCase();
     String id = parts.length > 1 ? parts[1].trim() : 'default_id';
+    var triggerFormConfig = formFieldConfigurations != null &&
+            formFieldConfigurations.containsKey(id)
+        ? formFieldConfigurations[id]
+        : null;
 
+    var triggerFormFieldLabel = triggerFormConfig?.label;
+    var triggerFormFieldPlaceholder = triggerFormConfig?.placeholder;
+    var triggerFormFieldPlaceholderDots = triggerFormConfig?.placeholderDots;
+    var triggerFormFieldOptions = triggerFormConfig?.options;
     switch (type) {
       case 'textfield':
-        String label = parts.length > 2 ? parts[2].trim() : '';
-        String hint = parts.length > 3 ? parts[3].trim() : '';
+        String label = triggerFormFieldLabel != null
+            ? triggerFormFieldLabel
+            : parts.length > 2
+                ? parts[2].trim()
+                : '';
+        String hint = triggerFormFieldPlaceholder != null
+            ? triggerFormFieldPlaceholder
+            : parts.length > 3
+                ? parts[3].trim()
+                : '';
         // Use formValues if available, otherwise use the default value (parts[4]) if provided
         String? defaultValue = parts.length > 4 ? parts[4].trim() : null;
         String? initialValue = formValues != null && formValues.containsKey(id)
             ? formValues[id]?.toString()
             : defaultValue;
         // Add a placeholderDots parameter
-        int? placeholderDots = parts.length > 5 && parts[5].trim().isNotEmpty
-            ? int.tryParse(parts[5].trim())
-            : null;
+        int? placeholderDots = triggerFormFieldPlaceholderDots != null
+            ? triggerFormFieldPlaceholderDots
+            : parts.length > 5 && parts[5].trim().isNotEmpty
+                ? int.tryParse(parts[5].trim())
+                : null;
 
         return TextFieldElement(
             id: id,
@@ -864,10 +900,16 @@ class FlexMarkdownParser {
             placeholderDots: placeholderDots); // Add placeholderDots parameter
 
       case 'select':
-        String label = parts.length > 2 ? parts[2].trim() : '';
-        List<String> options = parts.length > 3
-            ? parts[3].split(',').map((e) => e.trim()).toList()
-            : [];
+        String label = triggerFormFieldLabel != null
+            ? triggerFormFieldLabel
+            : parts.length > 2
+                ? parts[2].trim()
+                : '';
+        List<String> options = triggerFormFieldOptions != null
+            ? triggerFormFieldOptions
+            : parts.length > 3
+                ? parts[3].split(',').map((e) => e.trim()).toList()
+                : [];
         // Use formValues if available, otherwise use the default value (parts[4]) if valid
         String? defaultValue =
             parts.length > 4 && options.contains(parts[4].trim())
@@ -877,9 +919,11 @@ class FlexMarkdownParser {
             ? formValues[id]?.toString()
             : defaultValue;
         // Add a placeholderDots parameter
-        int? placeholderDots = parts.length > 5 && parts[5].trim().isNotEmpty
-            ? int.tryParse(parts[5].trim())
-            : null;
+        int? placeholderDots = triggerFormFieldPlaceholderDots != null
+            ? triggerFormFieldPlaceholderDots
+            : parts.length > 5 && parts[5].trim().isNotEmpty
+                ? int.tryParse(parts[5].trim())
+                : null;
 
         return SelectElement(
             id: id,
@@ -892,7 +936,11 @@ class FlexMarkdownParser {
             placeholderDots: placeholderDots); // Add placeholderDots parameter
 
       case 'checkbox':
-        String label = parts.length > 2 ? parts[2].trim() : '';
+        String label = triggerFormFieldLabel != null
+            ? triggerFormFieldLabel
+            : parts.length > 2
+                ? parts[2].trim()
+                : '';
         // Use formValues if available, otherwise use the default value (parts[3]) if provided
         bool defaultValue =
             parts.length > 3 ? parts[3].trim() == 'true' : false;
@@ -900,9 +948,11 @@ class FlexMarkdownParser {
             ? formValues[id] == true
             : defaultValue;
         // Add a placeholderDots parameter
-        int? placeholderDots = parts.length > 4 && parts[4].trim().isNotEmpty
-            ? int.tryParse(parts[4].trim())
-            : null;
+        int? placeholderDots = triggerFormFieldPlaceholderDots != null
+            ? triggerFormFieldPlaceholderDots
+            : parts.length > 4 && parts[4].trim().isNotEmpty
+                ? int.tryParse(parts[4].trim())
+                : null;
 
         return CheckboxElement(
           id: id,

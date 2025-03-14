@@ -97,6 +97,92 @@ class TextFieldElement extends FormElement {
   }
 }
 
+/// Text field form element
+class TextFieldFormElement extends FormElement {
+  final String label;
+  final String? placeholder;
+  final String? value;
+  final double? width;
+  final bool isPrintMode;
+  final int? placeholderDots;
+  final int? maxLines;
+  final TextInputType? keyboardType;
+  final bool obscureText;
+  final TextCapitalization textCapitalization;
+
+  TextFieldFormElement({
+    required String id,
+    required this.label,
+    this.placeholder,
+    this.value,
+    this.width,
+    FormValueChangedCallback? onValueChanged,
+    this.isPrintMode = false,
+    this.placeholderDots,
+    this.maxLines = 1,
+    this.keyboardType,
+    this.obscureText = false,
+    this.textCapitalization = TextCapitalization.none,
+    double baseFontSize = 16.0,
+  }) : super(
+            id: id, onValueChanged: onValueChanged, baseFontSize: baseFontSize);
+
+  @override
+  Widget build(BuildContext context) {
+    // In print mode, show the value or dots if no value
+    if (isPrintMode) {
+      if (value != null && value!.isNotEmpty) {
+        return Text(value!, style: TextStyle(fontSize: baseFontSize));
+      } else if (placeholderDots != null) {
+        return Text('.' * placeholderDots!,
+            style: TextStyle(fontSize: baseFontSize));
+      } else {
+        return SizedBox.shrink(); // Hide if no value and no dots specified
+      }
+    }
+
+    return Container(
+      width: width,
+      margin: EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (label.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: Text(label,
+                  style: TextStyle(
+                      fontSize: baseFontSize * 0.9,
+                      fontWeight: FontWeight.bold)),
+            ),
+          TextField(
+            controller: TextEditingController(text: value),
+            decoration: InputDecoration(
+              hintText: placeholder,
+              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4.0),
+                borderSide: BorderSide(color: Colors.grey.shade400),
+              ),
+              isDense: true,
+            ),
+            style: TextStyle(fontSize: baseFontSize),
+            maxLines: maxLines,
+            keyboardType: keyboardType,
+            obscureText: obscureText,
+            textCapitalization: textCapitalization,
+            onChanged: (newValue) {
+              if (onValueChanged != null) {
+                onValueChanged!(id, newValue, 'textfield');
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Dropdown select element
 class SelectElement extends FormElement {
   final String label;

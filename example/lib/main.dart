@@ -222,6 +222,43 @@ Built with Flutter and FlexMarkdown.
         isPrintMode: false,
         controllerPosition: MarkdownControllerPosition.above,
         baseFontSize: 16.0,
+        formFieldConfigurations: {
+          'name_field': TextFieldConfiguration(
+            id: 'name_field',
+            label: 'Name',
+            placeholder: 'Enter your full name',
+            placeholderDots: 40,
+          ),
+          'terms_check': CheckboxConfiguration(
+            id: 'terms_check',
+            label: 'I agree to the terms and conditions',
+            defaultValue: true,
+          ),
+          'country': SelectConfiguration(
+            id: 'country',
+            label: 'Country I live in',
+            options: [
+              'Vietnam',
+              'Thailand',
+              'Laos',
+              'Cambodia',
+              'Singapore',
+              'Malaysia',
+              'Japan',
+            ],
+            defaultValue: 'Vietnam',
+          ),
+          'inline_field': TextFieldConfiguration(
+            id: 'inline_field',
+            label: 'Inline text field',
+            defaultValue: 'example',
+          ),
+          'inline_check': CheckboxConfiguration(
+            id: 'inline_check',
+            label: 'An inline checkbox',
+            defaultValue: true,
+          ),
+        },
       ),
     );
   }

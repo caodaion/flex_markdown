@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'parser.dart';
 import 'models.dart';
+import 'models/form_field_configurations.dart'; // Add this import
 
 enum MarkdownControllerPosition {
   above,
@@ -16,8 +17,10 @@ class FlexMarkdownWidget extends StatefulWidget {
   final bool enableTextSelection;
   final bool showController;
   final MarkdownControllerPosition controllerPosition;
-  final bool isPrintMode; // Added new parameter
-  final double baseFontSize; // Added base font size parameter
+  final bool isPrintMode;
+  final double baseFontSize;
+  final Map<String, FormFieldConfiguration>?
+      formFieldConfigurations; // Add this parameter
 
   const FlexMarkdownWidget({
     Key? key,
@@ -27,8 +30,9 @@ class FlexMarkdownWidget extends StatefulWidget {
     this.enableTextSelection = true,
     this.showController = true,
     this.controllerPosition = MarkdownControllerPosition.above,
-    this.isPrintMode = false, // Default to false
-    this.baseFontSize = 16.0, // Default to standard size of 16.0
+    this.isPrintMode = false,
+    this.baseFontSize = 16.0,
+    this.formFieldConfigurations, // Add this parameter
   }) : super(key: key);
 
   @override
@@ -39,30 +43,52 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   late List<MarkdownElement> _elements;
   late TextEditingController _controller;
   late String _currentData;
-  // Add a map to track form field values
   Map<String, dynamic> _formValues = {};
-  late bool _isPrintMode; // Add state variable for print mode
-  late double _baseFontSize; // Add state variable for base font size
+  late bool _isPrintMode;
+  late double _baseFontSize;
+  late Map<String, FormFieldConfiguration>?
+      _formFieldConfigurations; // Add this
 
   @override
   void initState() {
     super.initState();
     _currentData = widget.data ?? '';
     _controller = TextEditingController(text: _currentData);
-    _isPrintMode = widget.isPrintMode; // Initialize from widget property
-    _baseFontSize = widget.baseFontSize; // Initialize base font size
+    _isPrintMode = widget.isPrintMode;
+    _baseFontSize = widget.baseFontSize;
+    _formFieldConfigurations =
+        widget.formFieldConfigurations; // Initialize from widget property
+    _initializeFormValues(); // Add this to initialize form values from configurations
     _parseMarkdown();
+  }
+
+  // Add a method to initialize form values from configurations
+  void _initializeFormValues() {
+    if (_formFieldConfigurations == null) return;
+
+    _formFieldConfigurations!.forEach((id, config) {
+      if (config is TextFieldConfiguration && config.defaultValue != null) {
+        _formValues[id] = config.defaultValue;
+      } else if (config is CheckboxConfiguration) {
+        _formValues[id] = config.defaultValue;
+      } else if (config is RadioConfiguration && config.defaultSelected) {
+        _formValues[config.groupName] = id;
+      } else if (config is SelectConfiguration && config.defaultValue != null) {
+        _formValues[id] = config.defaultValue;
+      }
+    });
   }
 
   void _parseMarkdown() {
     try {
-      // Pass the form values, update callback, print mode flag, and base font size to the parser
       _elements = FlexMarkdownParser.parse(
         _currentData,
         formValues: _formValues,
         onValueChanged: _handleFormValueChanged,
         isPrintMode: _isPrintMode,
-        baseFontSize: _baseFontSize, // Pass base font size to parser
+        baseFontSize: _baseFontSize,
+        formFieldConfigurations:
+            _formFieldConfigurations, // Pass configurations to parser
       );
     } catch (e) {
       // Handle parsing errors gracefully
@@ -92,12 +118,20 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.data != widget.data ||
         oldWidget.isPrintMode != widget.isPrintMode ||
-        oldWidget.baseFontSize != widget.baseFontSize) {
+        oldWidget.baseFontSize != widget.baseFontSize ||
+        oldWidget.formFieldConfigurations != widget.formFieldConfigurations) {
+      // Add this check
       // Check for font size changes
       _currentData = widget.data ?? '';
       _controller.text = _currentData;
       _isPrintMode = widget.isPrintMode;
       _baseFontSize = widget.baseFontSize; // Update font size state
+      _formFieldConfigurations =
+          widget.formFieldConfigurations; // Update configurations
+      // If configurations changed, we need to re-initialize form values
+      if (oldWidget.formFieldConfigurations != widget.formFieldConfigurations) {
+        _initializeFormValues();
+      }
       setState(() {
         _parseMarkdown();
       });
