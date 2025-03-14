@@ -603,24 +603,61 @@ class FlexMarkdownParser {
       int colorStartPos = text.indexOf('{color:', currentPos);
 
       if (colorStartPos == -1) {
-        // No more color formatting, add the rest as plain text
+        // No more color formatting, add the rest as plain text with potential formatting
         if (currentPos < text.length) {
-          spans.add(TextSpanElement(
-            text: text.substring(currentPos),
-            isBold: false,
-            isItalic: false,
-          ));
+          // Process the remaining text for other formatting types
+          String remainingText = text.substring(currentPos);
+
+          // Check if there's any formatting in the remaining text
+          if (remainingText.contains('**') ||
+              remainingText.contains('*') ||
+              remainingText.contains('__') ||
+              remainingText.contains('_') ||
+              remainingText.contains('`') ||
+              (remainingText.contains('[') &&
+                  remainingText.contains(']') &&
+                  remainingText.contains('('))) {
+            // Process and add the formatted spans from the remaining text
+            FormattedTextElement formatted =
+                processInlineFormatting(remainingText) as FormattedTextElement;
+            spans.addAll(formatted.spans);
+          } else {
+            // Simple text, no formatting
+            spans.add(TextSpanElement(
+              text: remainingText,
+              isBold: false,
+              isItalic: false,
+            ));
+          }
         }
         break;
       }
 
-      // Add text before the color marker as plain text
+      // Add text before the color marker with potential formatting
       if (colorStartPos > currentPos) {
-        spans.add(TextSpanElement(
-          text: text.substring(currentPos, colorStartPos),
-          isBold: false,
-          isItalic: false,
-        ));
+        String beforeText = text.substring(currentPos, colorStartPos);
+
+        // Check if there's any formatting in the text before color marker
+        if (beforeText.contains('**') ||
+            beforeText.contains('*') ||
+            beforeText.contains('__') ||
+            beforeText.contains('_') ||
+            beforeText.contains('`') ||
+            (beforeText.contains('[') &&
+                beforeText.contains(']') &&
+                beforeText.contains('('))) {
+          // Process and add the formatted spans
+          FormattedTextElement formatted =
+              processInlineFormatting(beforeText) as FormattedTextElement;
+          spans.addAll(formatted.spans);
+        } else {
+          // Simple text, no formatting
+          spans.add(TextSpanElement(
+            text: beforeText,
+            isBold: false,
+            isItalic: false,
+          ));
+        }
       }
 
       int colorSeparatorPos = text.indexOf('|', colorStartPos);
@@ -633,12 +670,39 @@ class FlexMarkdownParser {
             text.substring(colorStartPos + 7, colorSeparatorPos);
         String coloredText = text.substring(colorSeparatorPos + 1, colorEndPos);
 
-        spans.add(TextSpanElement(
-          text: coloredText,
-          isBold: false,
-          isItalic: false,
-          color: colorValue,
-        ));
+        // Check if the colored text contains formatting
+        if (coloredText.contains('**') ||
+            coloredText.contains('*') ||
+            coloredText.contains('__') ||
+            coloredText.contains('_') ||
+            coloredText.contains('`') ||
+            (coloredText.contains('[') &&
+                coloredText.contains(']') &&
+                coloredText.contains('('))) {
+          // Process the formatting inside the colored text
+          FormattedTextElement formatted =
+              processInlineFormatting(coloredText) as FormattedTextElement;
+
+          // Apply the color to all spans within the coloredText
+          for (var span in formatted.spans) {
+            spans.add(TextSpanElement(
+              text: span.text,
+              isBold: span.isBold,
+              isItalic: span.isItalic,
+              isCode: span.isCode,
+              linkUrl: span.linkUrl,
+              color: colorValue, // Apply the color to each span
+            ));
+          }
+        } else {
+          // No formatting in the colored text
+          spans.add(TextSpanElement(
+            text: coloredText,
+            isBold: false,
+            isItalic: false,
+            color: colorValue,
+          ));
+        }
 
         currentPos = colorEndPos + 1;
       } else {
