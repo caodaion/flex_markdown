@@ -476,3 +476,23 @@ class MixedContentElement extends MarkdownElement {
     );
   }
 }
+
+/// Represents indented content with specified indent amount
+class IndentElement extends MarkdownElement {
+  final double indentWidth;
+  final MarkdownElement content;
+
+  IndentElement({
+    required this.indentWidth,
+    required this.content,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(left: indentWidth),
+      width: double.infinity,
+      child: content.build(context),
+    );
+  }
+}

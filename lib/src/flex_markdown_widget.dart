@@ -296,6 +296,12 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
               tooltip: 'Code',
               onPressed: _applyCode,
             ),
+            // Add indent button
+            IconButton(
+              icon: const Icon(Icons.format_indent_increase),
+              tooltip: 'Indent',
+              onPressed: _applyIndent,
+            ),
             const SizedBox(width: 8),
 
             // Heading dropdown
@@ -457,6 +463,29 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
         ),
       ),
     );
+  }
+
+  // Add method to apply indentation
+  void _applyIndent() {
+    final TextEditingValue value = _controller.value;
+    final int start = value.selection.start;
+    final int end = value.selection.end;
+
+    if (start < 0 || end < 0) return;
+
+    final String selectedText = value.text.substring(start, end);
+    final String newText = '[[indent|20|$selectedText]]';
+
+    final TextEditingValue newValue = TextEditingValue(
+      text: value.text.replaceRange(start, end, newText),
+      selection: TextSelection.collapsed(offset: start + newText.length),
+    );
+
+    _controller.value = newValue;
+    setState(() {
+      _currentData = _controller.text;
+      _parseMarkdown();
+    });
   }
 
   // Add a method to handle form field selection

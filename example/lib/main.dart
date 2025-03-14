@@ -205,7 +205,7 @@ Made with Flutter and FlexMarkdown
 ->**ĐẠI ĐẠO TAM KỲ PHỔ ĐỘ**<-
 ->Đệ {{textfield|namDao|Năm Đạo|nhứt bá||24}} niên<-
 ->Tam Giáo Quy Nguyên Ngũ Chi Hiệp Nhứt<-
-Thời duy thiên vận 
+[[indent|20|Thời duy thiên vận {{textfield|namAL|Năm Âm Lịch|Ất Tỵ||36}} niên {{textfield|thangAL|Tháng Âm Lịch|nhị||36}} ngoạt]]
 ''',
       ),
     );

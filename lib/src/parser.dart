@@ -34,6 +34,35 @@ class FlexMarkdownParser {
     for (int i = 0; i < lines.length; i++) {
       String line = lines[i];
 
+      // Process indent syntax [[indent|20|content]]
+      final RegExp indentRegex = RegExp(r'^\[\[indent\|(\d+)\|(.*)\]\]$');
+      if (indentRegex.hasMatch(line.trim())) {
+        final match = indentRegex.firstMatch(line.trim())!;
+        final indentAmount = double.parse(match.group(1)!);
+        final content = match.group(2)!;
+
+        // Check if the indented content contains form elements
+        if (content.contains('{{') && content.contains('}}')) {
+          // Process as mixed content to handle form elements within indented blocks
+          MarkdownElement mixedContent = _processMixedContent(content,
+              onValueChanged: onValueChanged,
+              formValues: formValues,
+              isPrintMode: isPrintMode);
+          elements.add(IndentElement(
+            indentWidth: indentAmount,
+            content: mixedContent,
+          ));
+        } else {
+          // Process the content inside the indent as regular formatted text (no form elements)
+          MarkdownElement innerElement = processInlineFormatting(content);
+          elements.add(IndentElement(
+            indentWidth: indentAmount,
+            content: innerElement,
+          ));
+        }
+        continue;
+      }
+
       // Process code blocks first (they take precedence)
       if (line.trim().startsWith('```')) {
         if (!inCodeBlock) {
