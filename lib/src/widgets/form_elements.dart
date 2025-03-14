@@ -423,8 +423,8 @@ class RadioElement extends FormElement {
                   groupValue: selected ? id : null,
                   onChanged: (value) {
                     if (value != null && onValueChanged != null) {
-                      handleFormValueChanged!(id, value);
-                      onValueChanged!(groupName, id);
+                      handleFormValueChanged!(groupName, id, 'radio');
+                      onValueChanged!(groupName, id, 'radio');
                     }
                   },
                 ),
@@ -445,8 +445,8 @@ class RadioElement extends FormElement {
       contentPadding: EdgeInsets.zero,
       onChanged: (value) {
         if (value != null && onValueChanged != null) {
-          handleFormValueChanged!(id, value);
-          onValueChanged!(groupName, id);
+          handleFormValueChanged!(groupName, id, 'radio');
+          onValueChanged!(groupName, id, 'radio');
         }
       },
     );
