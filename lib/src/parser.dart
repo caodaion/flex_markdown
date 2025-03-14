@@ -7,8 +7,10 @@ class FlexMarkdownParser {
   static List<MarkdownElement> parse(String markdown,
       {Map<String, dynamic>? formValues,
       FormValueChangedCallback? onValueChanged,
-      bool isPrintMode = false}) {
-    // Added isPrintMode parameter
+      bool isPrintMode = false,
+      double baseFontSize = 16.0}) {
+    // Added baseFontSize parameter with default
+
     List<MarkdownElement> elements = [];
     List<String> lines = markdown.split('\n');
 
@@ -47,14 +49,16 @@ class FlexMarkdownParser {
           MarkdownElement mixedContent = _processMixedContent(content,
               onValueChanged: onValueChanged,
               formValues: formValues,
-              isPrintMode: isPrintMode);
+              isPrintMode: isPrintMode,
+              baseFontSize: baseFontSize); // Pass base font size
           elements.add(IndentElement(
             indentWidth: indentAmount,
             content: mixedContent,
           ));
         } else {
           // Process the content inside the indent as regular formatted text (no form elements)
-          MarkdownElement innerElement = processInlineFormatting(content);
+          MarkdownElement innerElement = processInlineFormatting(content,
+              baseFontSize: baseFontSize); // Pass base font size
           elements.add(IndentElement(
             indentWidth: indentAmount,
             content: innerElement,
@@ -145,7 +149,8 @@ class FlexMarkdownParser {
         String blockquoteLine =
             line.replaceFirst(RegExp(r'^\s*>\s?'), '').trim();
         if (blockquoteLine.isNotEmpty) {
-          blockquoteContent.add(processInlineFormatting(blockquoteLine));
+          blockquoteContent.add(processInlineFormatting(blockquoteLine,
+              baseFontSize: baseFontSize)); // Pass base font size
         } else {
           // Empty line within blockquote
           blockquoteContent.add(LineBreakElement());
@@ -257,7 +262,8 @@ class FlexMarkdownParser {
         String text = headingLine.substring(level).trim();
 
         // Process inline formatting in the heading text
-        MarkdownElement innerElement = processInlineFormatting(text);
+        MarkdownElement innerElement = processInlineFormatting(text,
+            baseFontSize: baseFontSize); // Pass base font size
 
         // If the innerElement is a FormattedTextElement, use its spans to create a formatted heading
         if (innerElement is FormattedTextElement) {
@@ -266,6 +272,7 @@ class FlexMarkdownParser {
             text: text,
             isCentered: true,
             formattedContent: innerElement,
+            baseFontSize: baseFontSize, // Pass base font size
           ));
         } else {
           // Fallback to original behavior for simple text
@@ -273,6 +280,7 @@ class FlexMarkdownParser {
             level: level,
             text: text,
             isCentered: true,
+            baseFontSize: baseFontSize, // Pass base font size
           ));
         }
         continue;
@@ -287,7 +295,8 @@ class FlexMarkdownParser {
         String text = line.substring(level).trim();
 
         // Process inline formatting in the heading text
-        MarkdownElement innerElement = processInlineFormatting(text);
+        MarkdownElement innerElement = processInlineFormatting(text,
+            baseFontSize: baseFontSize); // Pass base font size
 
         // If the innerElement is a FormattedTextElement, use its spans to create a formatted heading
         if (innerElement is FormattedTextElement) {
@@ -295,10 +304,14 @@ class FlexMarkdownParser {
             level: level,
             text: text,
             formattedContent: innerElement,
+            baseFontSize: baseFontSize, // Pass base font size
           ));
         } else {
           // Fallback to original behavior for simple text
-          elements.add(HeadingElement(level: level, text: text));
+          elements.add(HeadingElement(
+              level: level,
+              text: text,
+              baseFontSize: baseFontSize)); // Pass base font size
         }
         continue;
       }
@@ -312,11 +325,13 @@ class FlexMarkdownParser {
           MarkdownElement mixedContent = _processMixedContent(innerText,
               onValueChanged: onValueChanged,
               formValues: formValues,
-              isPrintMode: isPrintMode);
+              isPrintMode: isPrintMode,
+              baseFontSize: baseFontSize); // Pass base font size
           elements.add(CenterElement(child: mixedContent));
         } else {
           // Process inline formatting for the centered text (no form elements)
-          MarkdownElement innerElement = processInlineFormatting(innerText);
+          MarkdownElement innerElement = processInlineFormatting(innerText,
+              baseFontSize: baseFontSize); // Pass base font size
           elements.add(CenterElement(child: innerElement));
         }
         continue;
@@ -337,13 +352,15 @@ class FlexMarkdownParser {
           elements.add(_processMixedContent(line,
               onValueChanged: onValueChanged,
               formValues: formValues,
-              isPrintMode: isPrintMode)); // Pass isPrintMode
+              isPrintMode: isPrintMode,
+              baseFontSize: baseFontSize)); // Pass base font size
         }
         continue;
       }
 
       // Regular paragraph with potential inline formatting
-      elements.add(processInlineFormatting(line));
+      elements.add(processInlineFormatting(line,
+          baseFontSize: baseFontSize)); // Pass base font size
     }
 
     // Handle any unclosed elements at the end
@@ -375,7 +392,8 @@ class FlexMarkdownParser {
   }
 
   /// Process inline formatting like bold and italic text
-  static MarkdownElement processInlineFormatting(String text) {
+  static MarkdownElement processInlineFormatting(String text,
+      {double baseFontSize = 16.0}) {
     // Check if text contains formatting indicators
     if (!(text.contains('**') ||
         text.contains('__') ||
@@ -389,7 +407,8 @@ class FlexMarkdownParser {
 
     // Process color formatting first, separately from other formatting
     if (text.contains('{color:')) {
-      return _processColorFormatting(text);
+      return _processColorFormatting(text,
+          baseFontSize: baseFontSize); // Pass base font size
     }
 
     // Process bold, italic, code, and link formatting
@@ -591,11 +610,13 @@ class FlexMarkdownParser {
       }
     }
 
-    return FormattedTextElement(spans: spans);
+    return FormattedTextElement(
+        spans: spans, baseFontSize: baseFontSize); // Pass base font size
   }
 
   /// Process text with color formatting
-  static MarkdownElement _processColorFormatting(String text) {
+  static MarkdownElement _processColorFormatting(String text,
+      {double baseFontSize = 16.0}) {
     List<TextSpanElement> spans = [];
     int currentPos = 0;
 
@@ -618,8 +639,10 @@ class FlexMarkdownParser {
                   remainingText.contains(']') &&
                   remainingText.contains('('))) {
             // Process and add the formatted spans from the remaining text
-            FormattedTextElement formatted =
-                processInlineFormatting(remainingText) as FormattedTextElement;
+            FormattedTextElement formatted = processInlineFormatting(
+                    remainingText,
+                    baseFontSize: baseFontSize)
+                as FormattedTextElement; // Pass base font size
             spans.addAll(formatted.spans);
           } else {
             // Simple text, no formatting
@@ -648,7 +671,8 @@ class FlexMarkdownParser {
                 beforeText.contains('('))) {
           // Process and add the formatted spans
           FormattedTextElement formatted =
-              processInlineFormatting(beforeText) as FormattedTextElement;
+              processInlineFormatting(beforeText, baseFontSize: baseFontSize)
+                  as FormattedTextElement; // Pass base font size
           spans.addAll(formatted.spans);
         } else {
           // Simple text, no formatting
@@ -681,7 +705,8 @@ class FlexMarkdownParser {
                 coloredText.contains('('))) {
           // Process the formatting inside the colored text
           FormattedTextElement formatted =
-              processInlineFormatting(coloredText) as FormattedTextElement;
+              processInlineFormatting(coloredText, baseFontSize: baseFontSize)
+                  as FormattedTextElement; // Pass base font size
 
           // Apply the color to all spans within the coloredText
           for (var span in formatted.spans) {
@@ -716,18 +741,21 @@ class FlexMarkdownParser {
       }
     }
 
-    return FormattedTextElement(spans: spans);
+    return FormattedTextElement(
+        spans: spans, baseFontSize: baseFontSize); // Pass base font size
   }
 
   /// Process text with potentially inline form elements
   static MarkdownElement _processMixedContent(String text,
       {Map<String, dynamic>? formValues,
       FormValueChangedCallback? onValueChanged,
-      bool isPrintMode = false}) {
+      bool isPrintMode = false,
+      double baseFontSize = 16.0}) {
     // Added isPrintMode parameter
     // If there are no form elements, process as regular text with formatting
     if (!text.contains('{{') || !text.contains('}}')) {
-      return processInlineFormatting(text);
+      return processInlineFormatting(text,
+          baseFontSize: baseFontSize); // Pass base font size
     }
 
     List<MarkdownElement> elements = [];
@@ -740,7 +768,8 @@ class FlexMarkdownParser {
         // No more form elements, process the rest as formatted text
         String remainingText = text.substring(currentPos);
         if (remainingText.isNotEmpty) {
-          elements.add(processInlineFormatting(remainingText));
+          elements.add(processInlineFormatting(remainingText,
+              baseFontSize: baseFontSize)); // Pass base font size
         }
         break;
       }
@@ -748,7 +777,8 @@ class FlexMarkdownParser {
       // Process text before form element
       if (formStartPos > currentPos) {
         String beforeText = text.substring(currentPos, formStartPos);
-        elements.add(processInlineFormatting(beforeText));
+        elements.add(processInlineFormatting(beforeText,
+            baseFontSize: baseFontSize)); // Pass base font size
       }
 
       // Find the end of the form element
@@ -756,7 +786,8 @@ class FlexMarkdownParser {
       if (formEndPos == -1) {
         // No closing bracket, treat as regular text
         String remainingText = text.substring(currentPos);
-        elements.add(processInlineFormatting(remainingText));
+        elements.add(processInlineFormatting(remainingText,
+            baseFontSize: baseFontSize)); // Pass base font size
         break;
       }
 
@@ -772,7 +803,8 @@ class FlexMarkdownParser {
       currentPos = formEndPos + 2;
     }
 
-    return MixedContentElement(children: elements);
+    return MixedContentElement(
+        children: elements, baseFontSize: baseFontSize); // Pass base font size
   }
 
   /// Find the earliest valid position, ignoring -1 values

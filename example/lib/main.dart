@@ -212,13 +212,16 @@ Built with Flutter and FlexMarkdown.
         title: Text(widget.title),
       ),
       body: FlexMarkdownWidget(
+        // Required parameter
+        data: markdownData,
+        // Optional parameters
         isHorizontalLayout: true,
         showTextField: true,
         showController: true,
         enableTextSelection: true,
         isPrintMode: false,
         controllerPosition: MarkdownControllerPosition.above,
-        data: markdownData,
+        baseFontSize: 16.0,
       ),
     );
   }

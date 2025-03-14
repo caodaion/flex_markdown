@@ -59,7 +59,7 @@ class TextFieldElement extends FormElement {
             ),
             onChanged: (value) {
               if (onValueChanged != null) {
-                onValueChanged!(id, value);
+                onValueChanged!(id, value, 'textfield');
               }
             },
           ),

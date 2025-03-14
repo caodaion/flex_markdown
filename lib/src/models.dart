@@ -3,11 +3,16 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
-// Add a typedef for the form value changed callback
-typedef FormValueChangedCallback = void Function(String id, dynamic value);
+// Update the typedef for the form value changed callback to include field type
+typedef FormValueChangedCallback = void Function(String id, dynamic value,
+    [String? fieldType]);
 
 /// Base class for all markdown elements
 abstract class MarkdownElement {
+  final double baseFontSize;
+
+  const MarkdownElement({this.baseFontSize = 16.0});
+
   Widget build(BuildContext context);
 }
 
@@ -25,30 +30,32 @@ class HeadingElement extends MarkdownElement {
     this.textAlign,
     this.isCentered = false,
     this.formattedContent,
-  });
+    double baseFontSize = 16.0,
+  }) : super(baseFontSize: baseFontSize);
 
   @override
   Widget build(BuildContext context) {
     double fontSize;
+    // Calculate font size based on level and base font size
     switch (level) {
       case 1:
-        fontSize = 32.0;
+        fontSize = baseFontSize * 2.0; // 32 when base is 16
         break;
       case 2:
-        fontSize = 28.0;
+        fontSize = baseFontSize * 1.75; // 28 when base is 16
         break;
       case 3:
-        fontSize = 24.0;
+        fontSize = baseFontSize * 1.5; // 24 when base is 16
         break;
       case 4:
-        fontSize = 20.0;
+        fontSize = baseFontSize * 1.25; // 20 when base is 16
         break;
       case 5:
-        fontSize = 18.0;
+        fontSize = baseFontSize * 1.125; // 18 when base is 16
         break;
       case 6:
       default:
-        fontSize = 16.0;
+        fontSize = baseFontSize; // 16 when base is 16
         break;
     }
 
@@ -90,13 +97,17 @@ class ParagraphElement extends MarkdownElement {
   final String text;
   final TextAlign? textAlign;
 
-  ParagraphElement({required this.text, this.textAlign});
+  ParagraphElement({
+    required this.text,
+    this.textAlign,
+    double baseFontSize = 16.0,
+  }) : super(baseFontSize: baseFontSize);
 
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(fontSize: 16.0),
+      style: TextStyle(fontSize: baseFontSize),
       textAlign: textAlign,
     );
   }
@@ -104,6 +115,9 @@ class ParagraphElement extends MarkdownElement {
 
 /// Represents a line break element
 class LineBreakElement extends MarkdownElement {
+  const LineBreakElement({double baseFontSize = 16.0})
+      : super(baseFontSize: baseFontSize);
+
   @override
   Widget build(BuildContext context) {
     return const SizedBox(height: 16.0);
@@ -114,7 +128,8 @@ class LineBreakElement extends MarkdownElement {
 class CenterElement extends MarkdownElement {
   final MarkdownElement child;
 
-  CenterElement({required this.child});
+  CenterElement({required this.child, double baseFontSize = 16.0})
+      : super(baseFontSize: baseFontSize);
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +146,9 @@ abstract class FormElement extends MarkdownElement {
   final String id;
   final FormValueChangedCallback? onValueChanged;
 
-  FormElement({required this.id, this.onValueChanged});
+  FormElement(
+      {required this.id, this.onValueChanged, double baseFontSize = 16.0})
+      : super(baseFontSize: baseFontSize);
 }
 
 /// Represents a span of text with optional formatting
@@ -157,7 +174,10 @@ class TextSpanElement {
 class FormattedTextElement extends MarkdownElement {
   final List<TextSpanElement> spans;
 
-  FormattedTextElement({required this.spans});
+  FormattedTextElement({
+    required this.spans,
+    double baseFontSize = 16.0,
+  }) : super(baseFontSize: baseFontSize);
 
   @override
   Widget build(BuildContext context) {
@@ -223,6 +243,7 @@ class FormattedTextElement extends MarkdownElement {
               fontFamily: span.isCode ? 'monospace' : null,
               backgroundColor: span.isCode ? Colors.grey.shade200 : null,
               color: textColor, // Apply the parsed color
+              fontSize: baseFontSize, // Use the base font size
             ),
             recognizer: span.linkUrl != null
                 ? (TapGestureRecognizer()
@@ -242,16 +263,19 @@ class LinkElement extends MarkdownElement {
   final String text;
   final String url;
 
-  LinkElement({required this.text, required this.url});
+  LinkElement(
+      {required this.text, required this.url, double baseFontSize = 16.0})
+      : super(baseFontSize: baseFontSize);
 
   @override
   Widget build(BuildContext context) {
     return RichText(
       text: TextSpan(
         text: text,
-        style: const TextStyle(
+        style: TextStyle(
           color: Color(0xFF2196F3), // Material blue
           decoration: TextDecoration.underline,
+          fontSize: baseFontSize,
         ),
         recognizer: TapGestureRecognizer()
           ..onTap = () async {
@@ -275,7 +299,8 @@ class LinkElement extends MarkdownElement {
 class UnorderedListElement extends MarkdownElement {
   final List<ListItemElement> items;
 
-  UnorderedListElement({required this.items});
+  UnorderedListElement({required this.items, double baseFontSize = 16.0})
+      : super(baseFontSize: baseFontSize);
 
   @override
   Widget build(BuildContext context) {
@@ -290,7 +315,8 @@ class UnorderedListElement extends MarkdownElement {
 class OrderedListElement extends MarkdownElement {
   final List<ListItemElement> items;
 
-  OrderedListElement({required this.items});
+  OrderedListElement({required this.items, double baseFontSize = 16.0})
+      : super(baseFontSize: baseFontSize);
 
   @override
   Widget build(BuildContext context) {
@@ -304,7 +330,7 @@ class OrderedListElement extends MarkdownElement {
               width: 24,
               child: Text(
                 '${index + 1}.',
-                style: const TextStyle(fontSize: 16.0),
+                style: TextStyle(fontSize: baseFontSize),
               ),
             ),
             Expanded(child: items[index].buildContent(context)),
@@ -327,7 +353,8 @@ class ListItemElement extends MarkdownElement {
     this.nestedItems,
     this.isUnordered = true,
     this.depth = 0,
-  });
+    double baseFontSize = 16.0,
+  }) : super(baseFontSize: baseFontSize);
 
   @override
   Widget build(BuildContext context) {
@@ -338,7 +365,7 @@ class ListItemElement extends MarkdownElement {
           width: 24,
           child: Text(
             isUnordered ? '•' : '', // Bullet for unordered lists
-            style: const TextStyle(fontSize: 16.0),
+            style: TextStyle(fontSize: baseFontSize),
           ),
         ),
         Expanded(child: buildContent(context)),
@@ -371,7 +398,8 @@ class ListItemElement extends MarkdownElement {
 class BlockquoteElement extends MarkdownElement {
   final List<MarkdownElement> children;
 
-  BlockquoteElement({required this.children});
+  BlockquoteElement({required this.children, double baseFontSize = 16.0})
+      : super(baseFontSize: baseFontSize);
 
   @override
   Widget build(BuildContext context) {
@@ -400,7 +428,9 @@ class CodeBlockElement extends MarkdownElement {
   final String code;
   final String? language;
 
-  CodeBlockElement({required this.code, this.language});
+  CodeBlockElement(
+      {required this.code, this.language, double baseFontSize = 16.0})
+      : super(baseFontSize: baseFontSize);
 
   @override
   Widget build(BuildContext context) {
@@ -414,9 +444,9 @@ class CodeBlockElement extends MarkdownElement {
       ),
       child: Text(
         code,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'monospace',
-          fontSize: 14.0,
+          fontSize: baseFontSize - 2.0, // Slightly smaller for code
         ),
       ),
     );
@@ -425,6 +455,9 @@ class CodeBlockElement extends MarkdownElement {
 
 /// Represents a horizontal rule element
 class HorizontalRuleElement extends MarkdownElement {
+  const HorizontalRuleElement({double baseFontSize = 16.0})
+      : super(baseFontSize: baseFontSize);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -440,7 +473,9 @@ class TableElement extends MarkdownElement {
   final List<List<String>> rows;
   final bool hasHeader;
 
-  TableElement({required this.rows, this.hasHeader = true});
+  TableElement(
+      {required this.rows, this.hasHeader = true, double baseFontSize = 16.0})
+      : super(baseFontSize: baseFontSize);
 
   @override
   Widget build(BuildContext context) {
@@ -496,7 +531,7 @@ class TableElement extends MarkdownElement {
         text,
         style: TextStyle(
           fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
-          fontSize: 14.0,
+          fontSize: baseFontSize - 2.0, // Slightly smaller for table cells
         ),
         textAlign: isHeader ? TextAlign.center : TextAlign.start,
       ),
@@ -508,7 +543,8 @@ class TableElement extends MarkdownElement {
 class MixedContentElement extends MarkdownElement {
   final List<MarkdownElement> children;
 
-  MixedContentElement({required this.children});
+  MixedContentElement({required this.children, double baseFontSize = 16.0})
+      : super(baseFontSize: baseFontSize);
 
   @override
   Widget build(BuildContext context) {
@@ -528,7 +564,8 @@ class IndentElement extends MarkdownElement {
   IndentElement({
     required this.indentWidth,
     required this.content,
-  });
+    double baseFontSize = 16.0,
+  }) : super(baseFontSize: baseFontSize);
 
   @override
   Widget build(BuildContext context) {

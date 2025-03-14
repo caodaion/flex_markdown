@@ -17,6 +17,7 @@ class FlexMarkdownWidget extends StatefulWidget {
   final bool showController;
   final MarkdownControllerPosition controllerPosition;
   final bool isPrintMode; // Added new parameter
+  final double baseFontSize; // Added base font size parameter
 
   const FlexMarkdownWidget({
     Key? key,
@@ -27,6 +28,7 @@ class FlexMarkdownWidget extends StatefulWidget {
     this.showController = true,
     this.controllerPosition = MarkdownControllerPosition.above,
     this.isPrintMode = false, // Default to false
+    this.baseFontSize = 16.0, // Default to standard size of 16.0
   }) : super(key: key);
 
   @override
@@ -40,6 +42,7 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   // Add a map to track form field values
   Map<String, dynamic> _formValues = {};
   late bool _isPrintMode; // Add state variable for print mode
+  late double _baseFontSize; // Add state variable for base font size
 
   @override
   void initState() {
@@ -47,35 +50,38 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
     _currentData = widget.data ?? '';
     _controller = TextEditingController(text: _currentData);
     _isPrintMode = widget.isPrintMode; // Initialize from widget property
+    _baseFontSize = widget.baseFontSize; // Initialize base font size
     _parseMarkdown();
   }
 
   void _parseMarkdown() {
     try {
-      // Pass the form values, update callback, and print mode flag to the parser
+      // Pass the form values, update callback, print mode flag, and base font size to the parser
       _elements = FlexMarkdownParser.parse(
         _currentData,
         formValues: _formValues,
         onValueChanged: _handleFormValueChanged,
-        isPrintMode: _isPrintMode, // Use the state variable
+        isPrintMode: _isPrintMode,
+        baseFontSize: _baseFontSize, // Pass base font size to parser
       );
     } catch (e) {
       // Handle parsing errors gracefully
       _elements = [
-        ParagraphElement(text: 'Error parsing markdown: ${e.toString()}')
+        ParagraphElement(
+          text: 'Error parsing markdown: ${e.toString()}',
+          baseFontSize: _baseFontSize, // Pass base font size to element
+        )
       ];
     }
   }
 
-  // Add a method to handle form value changes
-  void _handleFormValueChanged(String id, dynamic value) {
+  // Updated method to handle form value changes with field type parameter
+  void _handleFormValueChanged(String id, dynamic value, [String? fieldType]) {
     setState(() {
-      log(id);
-      log(value.toString());
       _formValues[id] = value;
-      // Only update the parser in normal mode
-      if (_isPrintMode) {
-        // Re-parse markdown to update the UI
+      // Only re-parse if we're in print mode OR if the element is not a text field
+      bool isTextField = fieldType == 'textfield';
+      if (_isPrintMode || !isTextField) {
         _parseMarkdown();
       }
     });
@@ -85,11 +91,13 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   void didUpdateWidget(FlexMarkdownWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.data != widget.data ||
-        oldWidget.isPrintMode != widget.isPrintMode) {
+        oldWidget.isPrintMode != widget.isPrintMode ||
+        oldWidget.baseFontSize != widget.baseFontSize) {
+      // Check for font size changes
       _currentData = widget.data ?? '';
       _controller.text = _currentData;
-      _isPrintMode =
-          widget.isPrintMode; // Update state when widget property changes
+      _isPrintMode = widget.isPrintMode;
+      _baseFontSize = widget.baseFontSize; // Update font size state
       setState(() {
         _parseMarkdown();
       });
