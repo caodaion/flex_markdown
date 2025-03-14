@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     const markdownData = '''
-# Flex Markdown Demo
+-># Flex Markdown Demo<-
 
 ## Basic Typography
 
@@ -300,6 +300,7 @@ Built with Flutter and FlexMarkdown.
                 ),
           ),
         },
+        minHeight: double.infinity,
       ),
     );
   }
