@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'parser.dart';
 import 'models.dart';
@@ -68,9 +70,14 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   // Add a method to handle form value changes
   void _handleFormValueChanged(String id, dynamic value) {
     setState(() {
+      log(id);
+      log(value.toString());
       _formValues[id] = value;
-      // Re-parse markdown to update the UI
-      _parseMarkdown();
+      // Only update the parser in normal mode
+      if (_isPrintMode) {
+        // Re-parse markdown to update the UI
+        _parseMarkdown();
+      }
     });
   }
 
@@ -505,9 +512,11 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
               controller: _controller,
               maxLines: null,
               expands: true,
+              textAlignVertical: TextAlignVertical.top,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Enter markdown text...',
+                alignLabelWithHint: true,
               ),
               onChanged: (value) {
                 setState(() {

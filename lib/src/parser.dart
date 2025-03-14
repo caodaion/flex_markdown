@@ -277,9 +277,19 @@ class FlexMarkdownParser {
       // Process centered text (e.g., ->Centered Text<-)
       if (line.startsWith('->') && line.endsWith('<-')) {
         String innerText = line.substring(2, line.length - 2).trim();
-        // Process inline formatting for the centered text
-        MarkdownElement innerElement = processInlineFormatting(innerText);
-        elements.add(CenterElement(child: innerElement));
+        // Check if the centered text contains form elements
+        if (innerText.contains('{{') && innerText.contains('}}')) {
+          // Process as mixed content
+          MarkdownElement mixedContent = _processMixedContent(innerText,
+              onValueChanged: onValueChanged,
+              formValues: formValues,
+              isPrintMode: isPrintMode);
+          elements.add(CenterElement(child: mixedContent));
+        } else {
+          // Process inline formatting for the centered text (no form elements)
+          MarkdownElement innerElement = processInlineFormatting(innerText);
+          elements.add(CenterElement(child: innerElement));
+        }
         continue;
       }
 

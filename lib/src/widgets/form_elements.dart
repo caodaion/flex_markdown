@@ -25,6 +25,8 @@ class TextFieldElement extends FormElement {
   Widget build(BuildContext context) {
     // In print mode, just show the value as text
     if (isPrintMode) {
+      // Instead of using Future.microtask which can cause ordering issues,
+      // just display the text and let the parent handle appending in order
       return Text(_controller.text,
           style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
     }
@@ -100,6 +102,7 @@ class SelectElement extends FormElement {
   Widget build(BuildContext context) {
     // In print mode, just show the selected value as text
     if (isPrintMode) {
+      // No microtask to avoid ordering issues
       return Text(initialValue ?? '',
           style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
     }
@@ -188,6 +191,7 @@ class CheckboxElement extends FormElement {
   Widget build(BuildContext context) {
     // In print mode, show only the label if checked
     if (isPrintMode) {
+      // No microtask to avoid ordering issues
       return initialValue
           ? Text(label,
               style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold))
@@ -257,6 +261,7 @@ class RadioElement extends FormElement {
   Widget build(BuildContext context) {
     // In print mode, show only the label if selected
     if (isPrintMode) {
+      // No microtask to avoid ordering issues
       return selected
           ? Text(label,
               style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold))

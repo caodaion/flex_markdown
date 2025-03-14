@@ -123,7 +123,6 @@ class CenterElement extends MarkdownElement {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
       alignment: Alignment.center,
       child: child.build(context),
     );
