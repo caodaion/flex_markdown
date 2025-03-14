@@ -21,6 +21,7 @@ class FlexMarkdownWidget extends StatefulWidget {
   final double baseFontSize;
   final Map<String, FormFieldConfiguration>?
       formFieldConfigurations; // Add this parameter
+  final double minHeight; // Add minimum height parameter
 
   const FlexMarkdownWidget({
     Key? key,
@@ -33,6 +34,7 @@ class FlexMarkdownWidget extends StatefulWidget {
     this.isPrintMode = false,
     this.baseFontSize = 16.0,
     this.formFieldConfigurations, // Add this parameter
+    this.minHeight = 360.0, // Default minimum height
   }) : super(key: key);
 
   @override
@@ -574,7 +576,8 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   Widget _buildTextField() {
     if (!widget.showTextField) return Container();
 
-    return Expanded(
+    return Container(
+      width: widget.isHorizontalLayout ? null : double.infinity,
       child: Column(
         children: [
           if (widget.controllerPosition == MarkdownControllerPosition.above)
@@ -609,11 +612,13 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   Widget build(BuildContext context) {
     if (widget.isHorizontalLayout) {
       return Container(
+        height: widget.minHeight,
+        constraints: BoxConstraints(minHeight: widget.minHeight),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (widget.showTextField) ...[
-              _buildTextField(),
+              Expanded(child: _buildTextField()),
               SizedBox(width: 16),
             ],
             _buildMarkdownPreview(),
@@ -622,13 +627,15 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
       );
     } else {
       return Container(
+        height: widget.minHeight,
+        constraints: BoxConstraints(minHeight: widget.minHeight),
         child: Column(
           children: [
             if (widget.showTextField) ...[
-              _buildTextField(),
+              Expanded(child: _buildTextField()),
               SizedBox(height: 16),
             ],
-            _buildMarkdownPreview(),
+            Expanded(child: _buildMarkdownPreview()),
           ],
         ),
       );
