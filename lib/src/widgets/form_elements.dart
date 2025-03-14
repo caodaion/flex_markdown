@@ -44,11 +44,12 @@ class TextFieldElement extends FormElement {
           margin: const EdgeInsets.symmetric(horizontal: 4),
           child: TextField(
             controller: _controller,
+            textAlignVertical: TextAlignVertical.center,
             decoration: InputDecoration(
               hintText: hint,
               isDense: true,
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               border: const OutlineInputBorder(),
             ),
             onChanged: (value) {
