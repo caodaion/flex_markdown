@@ -80,6 +80,30 @@ Regular paragraph text. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 **Bold text** and *italic text* with ***bold and italic*** combinations.
 Inline `code` with backticks.
 
+## Text Colors
+
+This demonstrates {color:red|colored text} using named colors.
+
+Available named colors include:
+- {color:red|Red text}
+- {color:blue|Blue text}
+- {color:green|Green text}
+- {color:yellow|Yellow text}
+- {color:orange|Orange text}
+- {color:purple|Purple text}
+- {color:black|Black text}
+- {color:white|White text on default background}
+- {color:grey|Grey text} (can also use "gray")
+
+You can also use {color:#FF5733|hex color codes} like this: {color:#33A8FF|custom blue}.
+
+Colors can be combined with other formatting:
+- {color:red|**Bold red text**}
+- {color:blue|*Italic blue text*}
+- {color:green|***Bold italic green text***}
+- {color:purple|`Purple code text`}
+- {color:#FF5733|[Colored link](https://example.com)}
+
 ## Headings
 
 # Heading 1
