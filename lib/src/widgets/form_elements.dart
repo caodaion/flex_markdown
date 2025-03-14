@@ -8,6 +8,7 @@ class TextFieldElement extends FormElement {
   final bool isInline;
   final String? initialValue;
   final bool isPrintMode; // Add isPrintMode flag
+  final int? placeholderDots; // Number of dots to show in print mode when empty
   late final TextEditingController _controller;
 
   TextFieldElement(
@@ -17,17 +18,22 @@ class TextFieldElement extends FormElement {
       this.isInline = false,
       this.initialValue,
       super.onValueChanged,
-      this.isPrintMode = false}) {
+      this.isPrintMode = false,
+      this.placeholderDots}) {
     _controller = TextEditingController(text: initialValue);
   }
 
   @override
   Widget build(BuildContext context) {
-    // In print mode, just show the value as text
+    // In print mode, show the value as text or dots as placeholder
     if (isPrintMode) {
-      // Instead of using Future.microtask which can cause ordering issues,
-      // just display the text and let the parent handle appending in order
-      return Text(_controller.text,
+      final text = _controller.text;
+      if (text.isEmpty && placeholderDots != null) {
+        // Show dots as placeholder based on the placeholderDots parameter
+        return Text('.' * placeholderDots!,
+            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
+      }
+      return Text(text,
           style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
     }
 
@@ -88,6 +94,7 @@ class SelectElement extends FormElement {
   final bool isInline;
   final String? initialValue;
   final bool isPrintMode; // Add isPrintMode flag
+  final int? placeholderDots; // Number of dots to show in print mode when empty
 
   SelectElement(
       {required super.id,
@@ -96,14 +103,20 @@ class SelectElement extends FormElement {
       this.isInline = false,
       this.initialValue,
       super.onValueChanged,
-      this.isPrintMode = false}); // Default to false
+      this.isPrintMode = false,
+      this.placeholderDots}); // Add placeholderDots parameter
 
   @override
   Widget build(BuildContext context) {
-    // In print mode, just show the selected value as text
+    // In print mode, show the selected value as text or dots as placeholder
     if (isPrintMode) {
-      // No microtask to avoid ordering issues
-      return Text(initialValue ?? '',
+      final value = initialValue;
+      if ((value == null || value.isEmpty) && placeholderDots != null) {
+        // Show dots as placeholder
+        return Text('.' * placeholderDots!,
+            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
+      }
+      return Text(value ?? '',
           style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
     }
 
@@ -178,6 +191,8 @@ class CheckboxElement extends FormElement {
   final bool initialValue;
   final bool isInline;
   final bool isPrintMode; // Add isPrintMode flag
+  final int?
+      placeholderDots; // Number of dots to show in print mode when not checked
 
   CheckboxElement(
       {required super.id,
@@ -185,17 +200,22 @@ class CheckboxElement extends FormElement {
       this.initialValue = false,
       this.isInline = false,
       super.onValueChanged,
-      this.isPrintMode = false}); // Default to false
+      this.isPrintMode = false,
+      this.placeholderDots}); // Add placeholderDots parameter
 
   @override
   Widget build(BuildContext context) {
-    // In print mode, show only the label if checked
+    // In print mode, show the label if checked or dots if not checked and placeholderDots specified
     if (isPrintMode) {
-      // No microtask to avoid ordering issues
-      return initialValue
-          ? Text(label,
-              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold))
-          : SizedBox.shrink(); // Hide if not checked
+      if (initialValue) {
+        return Text(label,
+            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
+      } else if (placeholderDots != null) {
+        return Text('.' * placeholderDots!,
+            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
+      } else {
+        return SizedBox.shrink(); // Hide if not checked and no dots specified
+      }
     }
 
     if (isInline) {
@@ -247,6 +267,8 @@ class RadioElement extends FormElement {
   final bool selected;
   final bool isInline;
   final bool isPrintMode; // Add isPrintMode flag
+  final int?
+      placeholderDots; // Number of dots to show in print mode when not selected
 
   RadioElement(
       {required super.id,
@@ -255,17 +277,22 @@ class RadioElement extends FormElement {
       this.selected = false,
       this.isInline = false,
       super.onValueChanged,
-      this.isPrintMode = false}); // Default to false
+      this.isPrintMode = false,
+      this.placeholderDots}); // Add placeholderDots parameter
 
   @override
   Widget build(BuildContext context) {
-    // In print mode, show only the label if selected
+    // In print mode, show the label if selected or dots if not selected and placeholderDots specified
     if (isPrintMode) {
-      // No microtask to avoid ordering issues
-      return selected
-          ? Text(label,
-              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold))
-          : SizedBox.shrink(); // Hide if not selected
+      if (selected) {
+        return Text(label,
+            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
+      } else if (placeholderDots != null) {
+        return Text('.' * placeholderDots!,
+            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
+      } else {
+        return SizedBox.shrink(); // Hide if not selected and no dots specified
+      }
     }
 
     if (isInline) {

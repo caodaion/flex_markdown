@@ -651,9 +651,16 @@ class FlexMarkdownParser {
       case 'textfield':
         String label = parts.length > 2 ? parts[2].trim() : '';
         String hint = parts.length > 3 ? parts[3].trim() : '';
+        // Use formValues if available, otherwise use the default value (parts[4]) if provided
+        String? defaultValue = parts.length > 4 ? parts[4].trim() : null;
         String? initialValue = formValues != null && formValues.containsKey(id)
             ? formValues[id]?.toString()
-            : (parts.length > 4 ? parts[4].trim() : null);
+            : defaultValue;
+        // Add a placeholderDots parameter
+        int? placeholderDots = parts.length > 5 && parts[5].trim().isNotEmpty
+            ? int.tryParse(parts[5].trim())
+            : null;
+
         return TextFieldElement(
             id: id,
             label: label,
@@ -661,18 +668,27 @@ class FlexMarkdownParser {
             initialValue: initialValue,
             isInline: isInline,
             onValueChanged: onValueChanged,
-            isPrintMode: isPrintMode); // Pass isPrintMode
+            isPrintMode: isPrintMode,
+            placeholderDots: placeholderDots); // Add placeholderDots parameter
 
       case 'select':
         String label = parts.length > 2 ? parts[2].trim() : '';
         List<String> options = parts.length > 3
             ? parts[3].split(',').map((e) => e.trim()).toList()
             : [];
+        // Use formValues if available, otherwise use the default value (parts[4]) if valid
+        String? defaultValue =
+            parts.length > 4 && options.contains(parts[4].trim())
+                ? parts[4].trim()
+                : null;
         String? initialValue = formValues != null && formValues.containsKey(id)
             ? formValues[id]?.toString()
-            : (parts.length > 4 && options.contains(parts[4].trim())
-                ? parts[4].trim()
-                : null);
+            : defaultValue;
+        // Add a placeholderDots parameter
+        int? placeholderDots = parts.length > 5 && parts[5].trim().isNotEmpty
+            ? int.tryParse(parts[5].trim())
+            : null;
+
         return SelectElement(
             id: id,
             label: label,
@@ -680,28 +696,46 @@ class FlexMarkdownParser {
             initialValue: initialValue,
             isInline: isInline,
             onValueChanged: onValueChanged,
-            isPrintMode: isPrintMode); // Pass isPrintMode
+            isPrintMode: isPrintMode,
+            placeholderDots: placeholderDots); // Add placeholderDots parameter
 
       case 'checkbox':
         String label = parts.length > 2 ? parts[2].trim() : '';
+        // Use formValues if available, otherwise use the default value (parts[3]) if provided
+        bool defaultValue =
+            parts.length > 3 ? parts[3].trim() == 'true' : false;
         bool initialValue = formValues != null && formValues.containsKey(id)
             ? formValues[id] == true
-            : (parts.length > 3 ? parts[3].trim() == 'true' : false);
+            : defaultValue;
+        // Add a placeholderDots parameter
+        int? placeholderDots = parts.length > 4 && parts[4].trim().isNotEmpty
+            ? int.tryParse(parts[4].trim())
+            : null;
+
         return CheckboxElement(
           id: id,
           label: label,
           initialValue: initialValue,
           isInline: isInline,
           onValueChanged: onValueChanged,
-          isPrintMode: isPrintMode, // Pass isPrintMode
+          isPrintMode: isPrintMode,
+          placeholderDots: placeholderDots, // Add placeholderDots parameter
         );
 
       case 'radio':
         String label = parts.length > 2 ? parts[2].trim() : '';
         String groupName = parts.length > 3 ? parts[3].trim() : 'defaultGroup';
+        // Use formValues if available, otherwise use the default value (parts[4]) if provided
+        bool defaultSelected =
+            parts.length > 4 ? parts[4].trim() == 'true' : false;
         bool selected = formValues != null && formValues.containsKey(groupName)
             ? formValues[groupName] == id
-            : (parts.length > 4 ? parts[4].trim() == 'true' : false);
+            : defaultSelected;
+        // Add a placeholderDots parameter
+        int? placeholderDots = parts.length > 5 && parts[5].trim().isNotEmpty
+            ? int.tryParse(parts[5].trim())
+            : null;
+
         return RadioElement(
           id: id,
           label: label,
@@ -709,7 +743,8 @@ class FlexMarkdownParser {
           selected: selected,
           isInline: isInline,
           onValueChanged: onValueChanged,
-          isPrintMode: isPrintMode, // Pass isPrintMode
+          isPrintMode: isPrintMode,
+          placeholderDots: placeholderDots, // Add placeholderDots parameter
         );
 
       default:

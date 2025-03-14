@@ -94,13 +94,10 @@ class ParagraphElement extends MarkdownElement {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 16.0),
-        textAlign: textAlign,
-      ),
+    return Text(
+      text,
+      style: const TextStyle(fontSize: 16.0),
+      textAlign: textAlign,
     );
   }
 }
@@ -472,13 +469,10 @@ class MixedContentElement extends MarkdownElement {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Wrap(
-        alignment: WrapAlignment.start,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: children.map((element) => element.build(context)).toList(),
-      ),
+    return Wrap(
+      alignment: WrapAlignment.start,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: children.map((element) => element.build(context)).toList(),
     );
   }
 }

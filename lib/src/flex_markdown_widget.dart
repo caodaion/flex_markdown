@@ -226,19 +226,20 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   }
 
   void _applyTextField() {
-    _insertInlineElement('{{textfield|id|Label|Placeholder}}');
+    _insertInlineElement('{{textfield|id|Label|Placeholder|Default Value|10}}');
   }
 
   void _applyCheckbox() {
-    _insertInlineElement('{{checkbox|id|Checkbox label|false}}');
+    _insertInlineElement('{{checkbox|id|Checkbox label|false|10}}');
   }
 
   void _applyRadio() {
-    _insertInlineElement('{{radio|id|Radio label|groupName|false}}');
+    _insertInlineElement('{{radio|id|Radio label|groupName|false|10}}');
   }
 
   void _applySelect() {
-    _insertInlineElement('{{select|id|Dropdown|Option 1,Option 2,Option 3}}');
+    _insertInlineElement(
+        '{{select|id|Label|Option1,Option2,Option3|Option1|10}}');
   }
 
   void _insertInlineElement(String element) {
