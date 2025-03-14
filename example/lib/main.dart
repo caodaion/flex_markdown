@@ -206,23 +206,35 @@ This paragraph contains {{textfield|inline_field|inline text field|example}} and
 Built with Flutter and FlexMarkdown.
 ''';
 
+    const initialFormValues = {
+      'name_field': 'John Doe',
+      'terms_check': true,
+      'option1': true,
+      'country': 'USA',
+      'inline_field': 'Example',
+      'inline_check': true,
+    };
+
+    final flexMarkdownWidget = FlexMarkdownWidget(
+      // Required parameter
+      data: markdownData,
+      // Optional parameters
+      isHorizontalLayout: true,
+      showTextField: true,
+      showController: true,
+      enableTextSelection: true,
+      isPrintMode: false,
+      controllerPosition: MarkdownControllerPosition.above,
+      baseFontSize: 16.0,
+      initialFormValues: initialFormValues,
+    );
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: FlexMarkdownWidget(
-        // Required parameter
-        data: markdownData,
-        // Optional parameters
-        isHorizontalLayout: true,
-        showTextField: true,
-        showController: true,
-        enableTextSelection: true,
-        isPrintMode: false,
-        controllerPosition: MarkdownControllerPosition.above,
-        baseFontSize: 16.0,
-      ),
+      body: flexMarkdownWidget,
     );
   }
 }
