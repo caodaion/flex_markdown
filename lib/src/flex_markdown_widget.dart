@@ -18,8 +18,6 @@ class FlexMarkdownWidget extends StatefulWidget {
   final MarkdownControllerPosition controllerPosition;
   final bool isPrintMode; // Added new parameter
   final double baseFontSize; // Added base font size parameter
-  final Map<String, dynamic>?
-      initialFormValues; // Added initial form values parameter
 
   const FlexMarkdownWidget({
     Key? key,
@@ -31,7 +29,6 @@ class FlexMarkdownWidget extends StatefulWidget {
     this.controllerPosition = MarkdownControllerPosition.above,
     this.isPrintMode = false, // Default to false
     this.baseFontSize = 16.0, // Default to standard size of 16.0
-    this.initialFormValues, // Added new parameter for initial form values
   }) : super(key: key);
 
   @override
@@ -43,7 +40,7 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   late TextEditingController _controller;
   late String _currentData;
   // Add a map to track form field values
-  late Map<String, dynamic> _formValues; // Changed to late initialization
+  Map<String, dynamic> _formValues = {};
   late bool _isPrintMode; // Add state variable for print mode
   late double _baseFontSize; // Add state variable for base font size
 
@@ -54,9 +51,6 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
     _controller = TextEditingController(text: _currentData);
     _isPrintMode = widget.isPrintMode; // Initialize from widget property
     _baseFontSize = widget.baseFontSize; // Initialize base font size
-    _formValues = widget.initialFormValues != null
-        ? Map<String, dynamic>.from(widget.initialFormValues!)
-        : {}; // Initialize from provided values or empty map
     _parseMarkdown();
   }
 
@@ -93,30 +87,17 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
     });
   }
 
-  // New method to get the current form values
-  Map<String, dynamic> getFormValues() {
-    return Map<String, dynamic>.from(_formValues);
-  }
-
   @override
   void didUpdateWidget(FlexMarkdownWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.data != widget.data ||
         oldWidget.isPrintMode != widget.isPrintMode ||
-        oldWidget.baseFontSize != widget.baseFontSize ||
-        oldWidget.initialFormValues != widget.initialFormValues) {
-      // Check for changes in any parameters
+        oldWidget.baseFontSize != widget.baseFontSize) {
+      // Check for font size changes
       _currentData = widget.data ?? '';
       _controller.text = _currentData;
       _isPrintMode = widget.isPrintMode;
       _baseFontSize = widget.baseFontSize; // Update font size state
-
-      // Update form values if initialFormValues changed
-      if (widget.initialFormValues != null &&
-          oldWidget.initialFormValues != widget.initialFormValues) {
-        _formValues = Map<String, dynamic>.from(widget.initialFormValues!);
-      }
-
       setState(() {
         _parseMarkdown();
       });
