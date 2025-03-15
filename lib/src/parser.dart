@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flex_markdown/src/models/widget_element.dart';
 import 'package:flutter/widgets.dart';
 import 'models.dart';
 import 'widgets/form_elements.dart';
@@ -12,7 +13,8 @@ class FlexMarkdownParser {
       FormValueChangedCallback? handleFormValueChanged,
       bool isPrintMode = false,
       double baseFontSize = 16.0,
-      Map<String, FormFieldConfiguration>? formFieldConfigurations}) {
+      Map<String, FormFieldConfiguration>? formFieldConfigurations,
+      Map<String, CustomWidgetBuilder>? customWidgets}) {
     // Add this parameter
 
     List<MarkdownElement> elements = [];
@@ -37,8 +39,71 @@ class FlexMarkdownParser {
     bool inTable = false;
     List<List<String>> tableRows = [];
 
+    // Remove the call to _processWidgetElements from here
+
     for (int i = 0; i < lines.length; i++) {
       String line = lines[i];
+
+      // Process custom widgets (<<...>>)
+      if (line.contains('<<') && line.contains('>>')) {
+        final RegExp widgetRegex = RegExp(r'<<(.*?)>>');
+
+        // Check if the widget is the entire line or part of a paragraph
+        if (widgetRegex.hasMatch(line.trim()) &&
+            line.trim().startsWith('<<') &&
+            line.trim().endsWith('>>')) {
+          // Standalone widget
+          final match = widgetRegex.firstMatch(line.trim())!;
+          final widgetContent = match.group(1)!;
+
+          final element = _createWidgetElement(widgetContent, formValues,
+              handleFormValueChanged, isPrintMode, baseFontSize, customWidgets);
+
+          elements.add(element);
+          continue;
+        } else if (line.contains('<<') && line.contains('>>')) {
+          // Inline widget within text
+          String processedLine = line;
+          StringBuffer textBuffer = StringBuffer();
+          int currentPos = 0;
+
+          for (final match in widgetRegex.allMatches(line)) {
+            // Add text before the widget
+            if (match.start > currentPos) {
+              textBuffer
+                  .write(processedLine.substring(currentPos, match.start));
+              // Add the text as a paragraph element if not empty
+              if (textBuffer.isNotEmpty) {
+                elements.add(processInlineFormatting(textBuffer.toString(),
+                    baseFontSize: baseFontSize));
+                textBuffer.clear();
+              }
+            }
+
+            // Process the widget
+            final widgetContent = match.group(1)!;
+            final element = _createWidgetElement(
+                widgetContent,
+                formValues,
+                handleFormValueChanged,
+                isPrintMode,
+                baseFontSize,
+                customWidgets);
+
+            elements.add(element);
+            currentPos = match.end;
+          }
+
+          // Add any remaining text after the last widget
+          if (currentPos < processedLine.length) {
+            textBuffer.write(processedLine.substring(currentPos));
+            elements.add(processInlineFormatting(textBuffer.toString(),
+                baseFontSize: baseFontSize));
+          }
+
+          continue;
+        }
+      }
 
       // Process indent syntax [[indent|20|content]]
       final RegExp indentRegex = RegExp(r'^\[\[indent\|(\d+)\|(.*)\]\]$');
@@ -1113,5 +1178,49 @@ class FlexMarkdownParser {
       _addNestedListItem(parent.nestedItems!.last, content, remainingDepth - 1,
           isOrderedItem: isOrderedItem);
     }
+  }
+
+  // Add to your existing regex patterns
+  static final RegExp _widgetPattern = RegExp(r'<<(.*?)>>');
+
+  // This method is now only used internally by the widget processing code
+  static CustomWidgetElement _createWidgetElement(
+    String widgetContent,
+    Map<String, dynamic>? formValues,
+    FormValueChangedCallback? handleFormValueChanged,
+    bool isPrintMode,
+    double baseFontSize,
+    Map<String, CustomWidgetBuilder>? customWidgets,
+  ) {
+    List<String> parts = widgetContent.split('|');
+    String widgetName = parts[0].trim();
+    bool isInline = false;
+    Map<String, String> parameters = {};
+
+    // Process parameters
+    for (int i = 1; i < parts.length; i++) {
+      final param = parts[i].trim();
+
+      if (param == 'inline') {
+        isInline = true;
+        continue;
+      }
+
+      // Check for key=value pattern
+      if (param.contains('=')) {
+        final keyValue = param.split('=');
+        if (keyValue.length == 2) {
+          parameters[keyValue[0].trim()] = keyValue[1].trim();
+        }
+      }
+    }
+
+    return CustomWidgetElement(
+      widgetName: widgetName,
+      parameters: parameters,
+      isInline: isInline,
+      customWidgets: customWidgets,
+      baseFontSize: baseFontSize,
+    );
   }
 }

@@ -10,27 +10,11 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
@@ -40,15 +24,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 
@@ -61,11 +36,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _incrementCounter() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
       _counter++;
     });
   }
@@ -217,6 +187,31 @@ Please rate your experience with our services from 1-10: {{textfield|rating|Rati
 By submitting this form, I {{checkbox|terms|agree to the terms and conditions|false}} and {{checkbox|privacy|acknowledge the privacy policy|false}}. Contact preference: {{radio|contact_email|Email|contact|true}} {{radio|contact_phone|Phone|contact|false}} {{radio|contact_mail|Mail|contact|false}}.
 
 Thank you for taking the time to complete this extremely detailed form with various {{textfield|additional_field1|Custom Field 1|Custom value}} and {{textfield|additional_field2|Custom Field 2|Another value}} and even {{textfield|additional_field3|Custom Field 3|Yet another value}} fields mixed into a very long paragraph to demonstrate how inline form elements work in extended text content.
+
+## Custom Widgets
+
+### Inline Widgets
+This paragraph contains an inline button <<button|inline|label=Click Me!|color=blue>> that can be clicked.
+
+You can also use other inline widgets like badges <<badge|inline|text=New|color=red>> or chips <<chip|inline|label=Flutter|avatar=F>>.
+
+### Block-Level Widgets
+Below is a block-level custom container:
+
+<<container|bg=lightblue|border=rounded|height=100>>
+
+And here's a custom card widget:
+
+<<card|title=Custom Card|subtitle=This is a card widget|image=https://via.placeholder.com/150>>
+
+### Interactive Widgets
+This counter widget is interactive: <<counter|value=0|label=Current count:>>
+
+### Styling Widgets
+You can pass styling parameters:
+
+<<button|label=Styled Button|color=green|fontSize=18|borderRadius=8>>
+
 ---
 
 Built with Flutter and FlexMarkdown.
@@ -231,9 +226,7 @@ Built with Flutter and FlexMarkdown.
         child: Column(
           children: [
             FlexMarkdownWidget(
-              // Required parameter
               data: markdownData,
-              // Optional parameters
               isHorizontalLayout: true,
               showTextField: true,
               showController: true,
@@ -316,6 +309,227 @@ Built with Flutter and FlexMarkdown.
                         'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
                       ),
                 ),
+              },
+              customWidgets: {
+                'button': (context, params) {
+                  final label = params['label'] ?? 'Button';
+                  final color = params['color'] ?? 'blue';
+                  final fontSize =
+                      double.tryParse(params['fontSize'] ?? '') ?? 14.0;
+                  final borderRadius =
+                      double.tryParse(params['borderRadius'] ?? '') ?? 4.0;
+
+                  Color buttonColor;
+                  switch (color.toLowerCase()) {
+                    case 'blue':
+                      buttonColor = Colors.blue;
+                      break;
+                    case 'red':
+                      buttonColor = Colors.red;
+                      break;
+                    case 'green':
+                      buttonColor = Colors.green;
+                      break;
+                    default:
+                      buttonColor = Colors.blue;
+                  }
+
+                  return ElevatedButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Button "$label" pressed!')),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: buttonColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(borderRadius),
+                      ),
+                    ),
+                    child: Text(label, style: TextStyle(fontSize: fontSize)),
+                  );
+                },
+
+                'badge': (context, params) {
+                  final text = params['text'] ?? 'Badge';
+                  final color = params['color'] ?? 'blue';
+
+                  Color badgeColor = Colors.blue;
+                  switch (color.toLowerCase()) {
+                    case 'red':
+                      badgeColor = Colors.red;
+                      break;
+                    case 'green':
+                      badgeColor = Colors.green;
+                      break;
+                    case 'orange':
+                      badgeColor = Colors.orange;
+                      break;
+                  }
+
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: badgeColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      text,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  );
+                },
+
+                'chip': (context, params) {
+                  final label = params['label'] ?? 'Chip';
+                  final avatar = params['avatar'];
+
+                  return Chip(
+                    avatar:
+                        avatar != null
+                            ? CircleAvatar(child: Text(avatar[0]))
+                            : null,
+                    label: Text(label),
+                  );
+                },
+
+                'container': (context, params) {
+                  final bg = params['bg'] ?? 'white';
+                  final border = params['border'] ?? 'none';
+                  final height =
+                      double.tryParse(params['height'] ?? '') ?? 100.0;
+
+                  Color backgroundColor;
+                  switch (bg.toLowerCase()) {
+                    case 'lightblue':
+                      backgroundColor = Colors.lightBlue.shade100;
+                      break;
+                    case 'lightgreen':
+                      backgroundColor = Colors.lightGreen.shade100;
+                      break;
+                    default:
+                      backgroundColor = Colors.white;
+                  }
+
+                  BorderRadius borderRadius;
+                  switch (border.toLowerCase()) {
+                    case 'rounded':
+                      borderRadius = BorderRadius.circular(12);
+                      break;
+                    default:
+                      borderRadius = BorderRadius.zero;
+                  }
+
+                  return Container(
+                    width: double.infinity,
+                    height: height,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: backgroundColor,
+                      borderRadius: borderRadius,
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: const Center(child: Text('Custom Container Widget')),
+                  );
+                },
+
+                'card': (context, params) {
+                  final title = params['title'] ?? 'Card Title';
+                  final subtitle = params['subtitle'] ?? '';
+                  final imageUrl = params['image'];
+
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (imageUrl != null)
+                          Image.network(
+                            imageUrl,
+                            height: 150,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (ctx, error, stack) => Container(
+                                  height: 150,
+                                  color: Colors.grey.shade200,
+                                  child: const Center(
+                                    child: Text('Image not available'),
+                                  ),
+                                ),
+                          ),
+                        ListTile(
+                          title: Text(title),
+                          subtitle: subtitle.isNotEmpty ? Text(subtitle) : null,
+                        ),
+                        ButtonBar(
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Card action pressed!'),
+                                  ),
+                                );
+                              },
+                              child: const Text('ACTION'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+
+                'counter': (context, params) {
+                  final initialValue =
+                      int.tryParse(params['value'] ?? '0') ?? 0;
+                  final label = params['label'] ?? 'Count:';
+
+                  return StatefulBuilder(
+                    builder: (context, setState) {
+                      int count = initialValue;
+
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              '$label $count',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.remove),
+                                  onPressed: () => setState(() => count--),
+                                ),
+                                const SizedBox(width: 16),
+                                IconButton(
+                                  icon: const Icon(Icons.add),
+                                  onPressed: () => setState(() => count++),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
               },
               minHeight: 800,
             ),
