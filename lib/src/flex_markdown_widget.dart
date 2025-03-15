@@ -3,7 +3,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'parser.dart';
 import 'models.dart';
-import 'models/form_field_configurations.dart'; // Add this import
+import 'models/form_field_configurations.dart';
+import 'models/controller_button_configurations.dart'; // Add this import
 
 enum MarkdownControllerPosition {
   above,
@@ -19,9 +20,10 @@ class FlexMarkdownWidget extends StatefulWidget {
   final MarkdownControllerPosition controllerPosition;
   final bool isPrintMode;
   final double baseFontSize;
-  final Map<String, FormFieldConfiguration>?
-      formFieldConfigurations; // Add this parameter
-  final double minHeight; // Add minimum height parameter
+  final Map<String, FormFieldConfiguration>? formFieldConfigurations;
+  final double minHeight;
+  final MarkdownControllerConfiguration
+      controllerConfiguration; // Add this parameter
 
   const FlexMarkdownWidget({
     Key? key,
@@ -33,8 +35,10 @@ class FlexMarkdownWidget extends StatefulWidget {
     this.controllerPosition = MarkdownControllerPosition.above,
     this.isPrintMode = false,
     this.baseFontSize = 16.0,
-    this.formFieldConfigurations, // Add this parameter
-    this.minHeight = 360.0, // Default minimum height
+    this.formFieldConfigurations,
+    this.minHeight = 360.0,
+    this.controllerConfiguration =
+        const MarkdownControllerConfiguration(), // Default configuration
   }) : super(key: key);
 
   @override
@@ -314,6 +318,8 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   Widget _buildMarkdownController() {
     if (!widget.showController || !widget.showTextField) return Container();
 
+    final config = widget.controllerConfiguration;
+
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
@@ -325,184 +331,199 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
         child: Row(
           children: [
             // Text formatting buttons
-            IconButton(
-              icon: const Icon(Icons.format_bold),
-              tooltip: 'Bold',
-              onPressed: _applyBold,
-            ),
-            IconButton(
-              icon: const Icon(Icons.format_italic),
-              tooltip: 'Italic',
-              onPressed: _applyItalic,
-            ),
-            IconButton(
-              icon: const Icon(Icons.code),
-              tooltip: 'Code',
-              onPressed: _applyCode,
-            ),
-            // Add indent button
-            IconButton(
-              icon: const Icon(Icons.format_indent_increase),
-              tooltip: 'Indent',
-              onPressed: _applyIndent,
-            ),
-            const SizedBox(width: 8),
+            if (config.bold.visible)
+              IconButton(
+                icon: Icon(config.bold.icon),
+                tooltip: config.bold.tooltip,
+                onPressed: _applyBold,
+              ),
+            if (config.italic.visible)
+              IconButton(
+                icon: Icon(config.italic.icon),
+                tooltip: config.italic.tooltip,
+                onPressed: _applyItalic,
+              ),
+            if (config.code.visible)
+              IconButton(
+                icon: Icon(config.code.icon),
+                tooltip: config.code.tooltip,
+                onPressed: _applyCode,
+              ),
+            if (config.indent.visible)
+              IconButton(
+                icon: Icon(config.indent.icon),
+                tooltip: config.indent.tooltip,
+                onPressed: _applyIndent,
+              ),
+            SizedBox(width: config.smallSpacerWidth),
 
             // Heading dropdown
-            PopupMenuButton<int>(
-              tooltip: 'Headings',
-              icon: const Icon(Icons.title),
-              onSelected: _applyHeading,
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 1,
-                  child: Text('Heading 1',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                ),
-                PopupMenuItem(
-                  value: 2,
-                  child: Text('Heading 2',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ),
-                PopupMenuItem(
-                  value: 3,
-                  child: Text('Heading 3',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                ),
-                PopupMenuItem(
-                  value: 4,
-                  child: Text('Heading 4',
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                ),
-                PopupMenuItem(
-                  value: 5,
-                  child: Text('Heading 5',
-                      style:
-                          TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                ),
-                PopupMenuItem(
-                  value: 6,
-                  child: Text('Heading 6',
-                      style:
-                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                ),
-              ],
-            ),
-            const SizedBox(width: 8),
+            if (config.headingDropdown.visible)
+              PopupMenuButton<int>(
+                tooltip: config.headingDropdown.tooltip,
+                icon: Icon(config.headingDropdown.icon),
+                onSelected: _applyHeading,
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 1,
+                    child: Text('Heading 1',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                  ),
+                  PopupMenuItem(
+                    value: 2,
+                    child: Text('Heading 2',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                  ),
+                  PopupMenuItem(
+                    value: 3,
+                    child: Text('Heading 3',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
+                  ),
+                  PopupMenuItem(
+                    value: 4,
+                    child: Text('Heading 4',
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.bold)),
+                  ),
+                  PopupMenuItem(
+                    value: 5,
+                    child: Text('Heading 5',
+                        style: TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.bold)),
+                  ),
+                  PopupMenuItem(
+                    value: 6,
+                    child: Text('Heading 6',
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            SizedBox(width: config.smallSpacerWidth),
 
             // Block formatting buttons
-            IconButton(
-              icon: const Icon(Icons.format_quote),
-              tooltip: 'Blockquote',
-              onPressed: _applyBlockquote,
-            ),
-            IconButton(
-              icon: const Icon(Icons.code_outlined),
-              tooltip: 'Code Block',
-              onPressed: _applyCodeBlock,
-            ),
-            IconButton(
-              icon: const Icon(Icons.format_list_bulleted),
-              tooltip: 'Bullet List',
-              onPressed: _applyBulletList,
-            ),
-            IconButton(
-              icon: const Icon(Icons.format_list_numbered),
-              tooltip: 'Numbered List',
-              onPressed: _applyNumberedList,
-            ),
-            const SizedBox(width: 8),
+            if (config.blockquote.visible)
+              IconButton(
+                icon: Icon(config.blockquote.icon),
+                tooltip: config.blockquote.tooltip,
+                onPressed: _applyBlockquote,
+              ),
+            if (config.codeBlock.visible)
+              IconButton(
+                icon: Icon(config.codeBlock.icon),
+                tooltip: config.codeBlock.tooltip,
+                onPressed: _applyCodeBlock,
+              ),
+            if (config.bulletList.visible)
+              IconButton(
+                icon: Icon(config.bulletList.icon),
+                tooltip: config.bulletList.tooltip,
+                onPressed: _applyBulletList,
+              ),
+            if (config.numberedList.visible)
+              IconButton(
+                icon: Icon(config.numberedList.icon),
+                tooltip: config.numberedList.tooltip,
+                onPressed: _applyNumberedList,
+              ),
+            SizedBox(width: config.smallSpacerWidth),
 
             // Special elements
-            IconButton(
-              icon: const Icon(Icons.link),
-              tooltip: 'Link',
-              onPressed: _applyLink,
-            ),
-            IconButton(
-              icon: const Icon(Icons.table_chart),
-              tooltip: 'Table',
-              onPressed: _applyTable,
-            ),
-            IconButton(
-              icon: const Icon(Icons.format_align_center),
-              tooltip: 'Center Text',
-              onPressed: _applyCenter,
-            ),
-            IconButton(
-              icon: const Icon(Icons.horizontal_rule),
-              tooltip: 'Horizontal Rule',
-              onPressed: _applyHorizontalRule,
-            ),
+            if (config.link.visible)
+              IconButton(
+                icon: Icon(config.link.icon),
+                tooltip: config.link.tooltip,
+                onPressed: _applyLink,
+              ),
+            if (config.table.visible)
+              IconButton(
+                icon: Icon(config.table.icon),
+                tooltip: config.table.tooltip,
+                onPressed: _applyTable,
+              ),
+            if (config.center.visible)
+              IconButton(
+                icon: Icon(config.center.icon),
+                tooltip: config.center.tooltip,
+                onPressed: _applyCenter,
+              ),
+            if (config.horizontalRule.visible)
+              IconButton(
+                icon: Icon(config.horizontalRule.icon),
+                tooltip: config.horizontalRule.tooltip,
+                onPressed: _applyHorizontalRule,
+              ),
 
             // Form element dropdown menu
-            const SizedBox(width: 8),
-            PopupMenuButton<String>(
-              tooltip: 'Form Fields',
-              icon: const Icon(Icons.input),
-              onSelected: _applyFormField,
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'textfield',
-                  child: Row(
-                    children: [
-                      Icon(Icons.text_fields, size: 20),
-                      SizedBox(width: 8),
-                      Text('Text Field'),
-                    ],
+            SizedBox(width: config.smallSpacerWidth),
+            if (config.formFields.visible)
+              PopupMenuButton<String>(
+                tooltip: config.formFields.tooltip,
+                icon: Icon(config.formFields.icon),
+                onSelected: _applyFormField,
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'textfield',
+                    child: Row(
+                      children: [
+                        Icon(Icons.text_fields, size: 20),
+                        SizedBox(width: 8),
+                        Text('Text Field'),
+                      ],
+                    ),
                   ),
-                ),
-                PopupMenuItem(
-                  value: 'checkbox',
-                  child: Row(
-                    children: [
-                      Icon(Icons.check_box, size: 20),
-                      SizedBox(width: 8),
-                      Text('Checkbox'),
-                    ],
+                  PopupMenuItem(
+                    value: 'checkbox',
+                    child: Row(
+                      children: [
+                        Icon(Icons.check_box, size: 20),
+                        SizedBox(width: 8),
+                        Text('Checkbox'),
+                      ],
+                    ),
                   ),
-                ),
-                PopupMenuItem(
-                  value: 'radio',
-                  child: Row(
-                    children: [
-                      Icon(Icons.radio_button_checked, size: 20),
-                      SizedBox(width: 8),
-                      Text('Radio Button'),
-                    ],
+                  PopupMenuItem(
+                    value: 'radio',
+                    child: Row(
+                      children: [
+                        Icon(Icons.radio_button_checked, size: 20),
+                        SizedBox(width: 8),
+                        Text('Radio Button'),
+                      ],
+                    ),
                   ),
-                ),
-                PopupMenuItem(
-                  value: 'select',
-                  child: Row(
-                    children: [
-                      Icon(Icons.arrow_drop_down_circle, size: 20),
-                      SizedBox(width: 8),
-                      Text('Dropdown'),
-                    ],
+                  PopupMenuItem(
+                    value: 'select',
+                    child: Row(
+                      children: [
+                        Icon(Icons.arrow_drop_down_circle, size: 20),
+                        SizedBox(width: 8),
+                        Text('Dropdown'),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
             // Add print mode toggle
-            const SizedBox(width: 16),
-            Row(
-              children: [
-                Text('Print Mode:'),
-                const SizedBox(width: 4),
-                Switch(
-                  value: _isPrintMode,
-                  onChanged: (value) {
-                    _togglePrintMode();
-                  },
-                ),
-              ],
-            ),
+            if (config.showPrintModeToggle) ...[
+              SizedBox(width: config.largeSpacerWidth),
+              Row(
+                children: [
+                  Text(config.printModeLabel),
+                  const SizedBox(width: 4),
+                  Switch(
+                    value: _isPrintMode,
+                    onChanged: (value) {
+                      _togglePrintMode();
+                    },
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
