@@ -410,6 +410,7 @@ class FlexMarkdownParser {
         text.contains('*') ||
         text.contains('_') ||
         text.contains('`') ||
+        text.contains('++') || // Add check for underline syntax
         text.contains('{color:') || // Add check for color syntax
         (text.contains('[') && text.contains(']') && text.contains('(')))) {
       return ParagraphElement(text: text);
@@ -435,6 +436,8 @@ class FlexMarkdownParser {
       int italicUnderscorePos = text.indexOf('_', currentPos);
       int linkOpenBracketPos = text.indexOf('[', currentPos);
       int codeTickPos = text.indexOf('`', currentPos);
+      int underlinePos =
+          text.indexOf('++', currentPos); // Add underline marker position
 
       // Find the earliest marker
       int nextPos = _findEarliestPosition([
@@ -446,6 +449,7 @@ class FlexMarkdownParser {
         italicUnderscorePos,
         linkOpenBracketPos,
         codeTickPos,
+        underlinePos, // Add to earliest position check
       ]);
 
       if (nextPos == -1) {
@@ -615,6 +619,33 @@ class FlexMarkdownParser {
           ));
 
           currentPos = closeCodePos + 1;
+          continue;
+        }
+      }
+
+      // Handle underline formatting with ++text++
+      if (nextPos == underlinePos) {
+        int endUnderlinePos = text.indexOf('++', nextPos + 2);
+        if (endUnderlinePos != -1) {
+          // Add text before underline as plain text
+          if (nextPos > currentPos) {
+            spans.add(TextSpanElement(
+              text: text.substring(currentPos, nextPos),
+              isBold: false,
+              isItalic: false,
+              isUnderline: false,
+            ));
+          }
+
+          // Add the underlined text
+          spans.add(TextSpanElement(
+            text: text.substring(nextPos + 2, endUnderlinePos),
+            isBold: false,
+            isItalic: false,
+            isUnderline: true,
+          ));
+
+          currentPos = endUnderlinePos + 2;
           continue;
         }
       }

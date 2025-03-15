@@ -13,6 +13,23 @@ class ControllerButtonConfiguration {
   });
 }
 
+/// Configuration for dropdown items in controller buttons
+class DropdownItemConfiguration {
+  final String label;
+  final dynamic value;
+  final IconData? icon;
+  final double? fontSize;
+  final FontWeight? fontWeight;
+
+  const DropdownItemConfiguration({
+    required this.label,
+    this.value,
+    this.icon,
+    this.fontSize,
+    this.fontWeight,
+  });
+}
+
 /// Configuration for the markdown controller
 class MarkdownControllerConfiguration {
   // Text formatting buttons
@@ -35,9 +52,11 @@ class MarkdownControllerConfiguration {
 
   // Form fields dropdown button
   final ControllerButtonConfiguration formFields;
+  final List<DropdownItemConfiguration> formFieldItems;
 
   // Heading button configuration
   final ControllerButtonConfiguration headingDropdown;
+  final List<DropdownItemConfiguration> headingItems;
 
   // Print mode toggle configuration
   final bool showPrintModeToggle;
@@ -46,6 +65,9 @@ class MarkdownControllerConfiguration {
   // Spacer configurations
   final double smallSpacerWidth;
   final double largeSpacerWidth;
+
+  // Editor configuration
+  final String editorPlaceholder;
 
   const MarkdownControllerConfiguration({
     this.bold = const ControllerButtonConfiguration(
@@ -100,13 +122,74 @@ class MarkdownControllerConfiguration {
       tooltip: 'Form Fields',
       icon: Icons.input,
     ),
+    this.formFieldItems = const [
+      DropdownItemConfiguration(
+        label: 'Text Field',
+        value: 'textfield',
+        icon: Icons.text_fields,
+      ),
+      DropdownItemConfiguration(
+        label: 'Checkbox',
+        value: 'checkbox',
+        icon: Icons.check_box,
+      ),
+      DropdownItemConfiguration(
+        label: 'Radio Button',
+        value: 'radio',
+        icon: Icons.radio_button_checked,
+      ),
+      DropdownItemConfiguration(
+        label: 'Dropdown',
+        value: 'select',
+        icon: Icons.arrow_drop_down_circle,
+      ),
+    ],
     this.headingDropdown = const ControllerButtonConfiguration(
       tooltip: 'Headings',
       icon: Icons.title,
     ),
+    this.headingItems = const [
+      DropdownItemConfiguration(
+        label: 'Heading 1',
+        value: 1,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+      DropdownItemConfiguration(
+        label: 'Heading 2',
+        value: 2,
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
+      DropdownItemConfiguration(
+        label: 'Heading 3',
+        value: 3,
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+      ),
+      DropdownItemConfiguration(
+        label: 'Heading 4',
+        value: 4,
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+      ),
+      DropdownItemConfiguration(
+        label: 'Heading 5',
+        value: 5,
+        fontSize: 13,
+        fontWeight: FontWeight.bold,
+      ),
+      DropdownItemConfiguration(
+        label: 'Heading 6',
+        value: 6,
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+      ),
+    ],
     this.showPrintModeToggle = true,
     this.printModeLabel = 'Print Mode:',
     this.smallSpacerWidth = 8.0,
     this.largeSpacerWidth = 16.0,
+    this.editorPlaceholder = 'Enter markdown text...',
   });
 }

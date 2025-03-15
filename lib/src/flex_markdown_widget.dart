@@ -321,225 +321,169 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
     final config = widget.controllerConfiguration;
 
     return Container(
+      width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(4),
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            // Text formatting buttons
-            if (config.bold.visible)
-              IconButton(
-                icon: config.bold.icon != null
-                    ? Icon(config.bold.icon)
-                    : Icon(Icons.format_bold),
-                tooltip: config.bold.tooltip,
-                onPressed: _applyBold,
-              ),
-            if (config.italic.visible)
-              IconButton(
-                icon: config.italic.icon != null
-                    ? Icon(config.italic.icon)
-                    : Icon(Icons.format_italic),
-                tooltip: config.italic.tooltip,
-                onPressed: _applyItalic,
-              ),
-            if (config.code.visible)
-              IconButton(
-                icon: config.code.icon != null
-                    ? Icon(config.code.icon)
-                    : Icon(Icons.code),
-                tooltip: config.code.tooltip,
-                onPressed: _applyCode,
-              ),
-            if (config.indent.visible)
-              IconButton(
-                icon: config.indent.icon != null
-                    ? Icon(config.indent.icon)
-                    : Icon(Icons.format_indent_increase),
-                tooltip: config.indent.tooltip,
-                onPressed: _applyIndent,
-              ),
-            SizedBox(width: config.smallSpacerWidth),
+      child: Wrap(
+        children: [
+          // Text formatting buttons
+          if (config.bold.visible)
+            IconButton(
+              icon: config.bold.icon != null
+                  ? Icon(config.bold.icon)
+                  : Icon(Icons.format_bold),
+              tooltip: config.bold.tooltip,
+              onPressed: _applyBold,
+            ),
+          if (config.italic.visible)
+            IconButton(
+              icon: config.italic.icon != null
+                  ? Icon(config.italic.icon)
+                  : Icon(Icons.format_italic),
+              tooltip: config.italic.tooltip,
+              onPressed: _applyItalic,
+            ),
+          if (config.code.visible)
+            IconButton(
+              icon: config.code.icon != null
+                  ? Icon(config.code.icon)
+                  : Icon(Icons.code),
+              tooltip: config.code.tooltip,
+              onPressed: _applyCode,
+            ),
+          if (config.indent.visible)
+            IconButton(
+              icon: config.indent.icon != null
+                  ? Icon(config.indent.icon)
+                  : Icon(Icons.format_indent_increase),
+              tooltip: config.indent.tooltip,
+              onPressed: _applyIndent,
+            ),
+          SizedBox(width: config.smallSpacerWidth),
 
-            // Heading dropdown
-            if (config.headingDropdown.visible)
-              PopupMenuButton<int>(
-                tooltip: config.headingDropdown.tooltip,
-                icon: config.headingDropdown.icon != null
-                    ? Icon(config.headingDropdown.icon)
-                    : Icon(Icons.title),
-                onSelected: _applyHeading,
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 1,
-                    child: Text('Heading 1',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold)),
-                  ),
-                  PopupMenuItem(
-                    value: 2,
-                    child: Text('Heading 2',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                  ),
-                  PopupMenuItem(
-                    value: 3,
-                    child: Text('Heading 3',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                  ),
-                  PopupMenuItem(
-                    value: 4,
-                    child: Text('Heading 4',
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold)),
-                  ),
-                  PopupMenuItem(
-                    value: 5,
-                    child: Text('Heading 5',
-                        style: TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.bold)),
-                  ),
-                  PopupMenuItem(
-                    value: 6,
-                    child: Text('Heading 6',
-                        style: TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.bold)),
-                  ),
-                ],
-              ),
-            SizedBox(width: config.smallSpacerWidth),
-
-            // Block formatting buttons
-            if (config.blockquote.visible)
-              IconButton(
-                icon: config.blockquote.icon != null
-                    ? Icon(config.blockquote.icon)
-                    : Icon(Icons.format_quote),
-                tooltip: config.blockquote.tooltip,
-                onPressed: _applyBlockquote,
-              ),
-            if (config.codeBlock.visible)
-              IconButton(
-                icon: config.codeBlock.icon != null
-                    ? Icon(config.codeBlock.icon)
-                    : Icon(Icons.code_rounded),
-                tooltip: config.codeBlock.tooltip,
-                onPressed: _applyCodeBlock,
-              ),
-            if (config.bulletList.visible)
-              IconButton(
-                icon: config.bulletList.icon != null
-                    ? Icon(config.bulletList.icon)
-                    : Icon(Icons.format_list_bulleted),
-                tooltip: config.bulletList.tooltip,
-                onPressed: _applyBulletList,
-              ),
-            if (config.numberedList.visible)
-              IconButton(
-                icon: config.numberedList.icon != null
-                    ? Icon(config.numberedList.icon)
-                    : Icon(Icons.format_list_numbered),
-                tooltip: config.numberedList.tooltip,
-                onPressed: _applyNumberedList,
-              ),
-            SizedBox(width: config.smallSpacerWidth),
-
-            // Special elements
-            if (config.link.visible)
-              IconButton(
-                icon: config.link.icon != null
-                    ? Icon(config.link.icon)
-                    : Icon(Icons.link),
-                tooltip: config.link.tooltip,
-                onPressed: _applyLink,
-              ),
-            if (config.table.visible)
-              IconButton(
-                icon: config.table.icon != null
-                    ? Icon(config.table.icon)
-                    : Icon(Icons.table_chart),
-                tooltip: config.table.tooltip,
-                onPressed: _applyTable,
-              ),
-            if (config.center.visible)
-              IconButton(
-                icon: config.center.icon != null
-                    ? Icon(config.center.icon)
-                    : Icon(Icons.format_align_center),
-                tooltip: config.center.tooltip,
-                onPressed: _applyCenter,
-              ),
-            if (config.horizontalRule.visible)
-              IconButton(
-                icon: config.horizontalRule.icon != null
-                    ? Icon(config.horizontalRule.icon)
-                    : Icon(Icons.horizontal_rule),
-                tooltip: config.horizontalRule.tooltip,
-                onPressed: _applyHorizontalRule,
-              ),
-
-            // Form element dropdown menu
-            SizedBox(width: config.smallSpacerWidth),
-            if (config.formFields.visible)
-              PopupMenuButton<String>(
-                tooltip: config.formFields.tooltip,
-                icon: config.formFields.icon != null
-                    ? Icon(config.formFields.icon)
-                    : Icon(Icons.input),
-                onSelected: _applyFormField,
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'textfield',
-                    child: Row(
-                      children: [
-                        Icon(Icons.text_fields, size: 20),
-                        SizedBox(width: 8),
-                        Text('Text Field'),
-                      ],
+          // Heading dropdown
+          if (config.headingDropdown.visible)
+            PopupMenuButton<int>(
+              tooltip: config.headingDropdown.tooltip,
+              icon: config.headingDropdown.icon != null
+                  ? Icon(config.headingDropdown.icon)
+                  : Icon(Icons.title),
+              onSelected: _applyHeading,
+              itemBuilder: (context) => config.headingItems.map((item) {
+                return PopupMenuItem<int>(
+                  value: item.value as int,
+                  child: Text(
+                    item.label,
+                    style: TextStyle(
+                      fontSize: item.fontSize,
+                      fontWeight: item.fontWeight,
                     ),
                   ),
-                  PopupMenuItem(
-                    value: 'checkbox',
-                    child: Row(
-                      children: [
-                        Icon(Icons.check_box, size: 20),
-                        SizedBox(width: 8),
-                        Text('Checkbox'),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'radio',
-                    child: Row(
-                      children: [
-                        Icon(Icons.radio_button_checked, size: 20),
-                        SizedBox(width: 8),
-                        Text('Radio Button'),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'select',
-                    child: Row(
-                      children: [
-                        Icon(Icons.arrow_drop_down_circle, size: 20),
-                        SizedBox(width: 8),
-                        Text('Dropdown'),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                );
+              }).toList(),
+            ),
+          SizedBox(width: config.smallSpacerWidth),
 
-            // Add print mode toggle
-            if (config.showPrintModeToggle) ...[
-              SizedBox(width: config.largeSpacerWidth),
-              Row(
+          // Block formatting buttons
+          if (config.blockquote.visible)
+            IconButton(
+              icon: config.blockquote.icon != null
+                  ? Icon(config.blockquote.icon)
+                  : Icon(Icons.format_quote),
+              tooltip: config.blockquote.tooltip,
+              onPressed: _applyBlockquote,
+            ),
+          if (config.codeBlock.visible)
+            IconButton(
+              icon: config.codeBlock.icon != null
+                  ? Icon(config.codeBlock.icon)
+                  : Icon(Icons.code_rounded),
+              tooltip: config.codeBlock.tooltip,
+              onPressed: _applyCodeBlock,
+            ),
+          if (config.bulletList.visible)
+            IconButton(
+              icon: config.bulletList.icon != null
+                  ? Icon(config.bulletList.icon)
+                  : Icon(Icons.format_list_bulleted),
+              tooltip: config.bulletList.tooltip,
+              onPressed: _applyBulletList,
+            ),
+          if (config.numberedList.visible)
+            IconButton(
+              icon: config.numberedList.icon != null
+                  ? Icon(config.numberedList.icon)
+                  : Icon(Icons.format_list_numbered),
+              tooltip: config.numberedList.tooltip,
+              onPressed: _applyNumberedList,
+            ),
+          SizedBox(width: config.smallSpacerWidth),
+
+          // Special elements
+          if (config.link.visible)
+            IconButton(
+              icon: config.link.icon != null
+                  ? Icon(config.link.icon)
+                  : Icon(Icons.link),
+              tooltip: config.link.tooltip,
+              onPressed: _applyLink,
+            ),
+          if (config.table.visible)
+            IconButton(
+              icon: config.table.icon != null
+                  ? Icon(config.table.icon)
+                  : Icon(Icons.table_chart),
+              tooltip: config.table.tooltip,
+              onPressed: _applyTable,
+            ),
+          if (config.center.visible)
+            IconButton(
+              icon: config.center.icon != null
+                  ? Icon(config.center.icon)
+                  : Icon(Icons.format_align_center),
+              tooltip: config.center.tooltip,
+              onPressed: _applyCenter,
+            ),
+          if (config.horizontalRule.visible)
+            IconButton(
+              icon: config.horizontalRule.icon != null
+                  ? Icon(config.horizontalRule.icon)
+                  : Icon(Icons.horizontal_rule),
+              tooltip: config.horizontalRule.tooltip,
+              onPressed: _applyHorizontalRule,
+            ),
+
+          // Form element dropdown menu
+          SizedBox(width: config.smallSpacerWidth),
+          if (config.formFields.visible)
+            PopupMenuButton<String>(
+              tooltip: config.formFields.tooltip,
+              icon: config.formFields.icon != null
+                  ? Icon(config.formFields.icon)
+                  : Icon(Icons.input),
+              onSelected: _applyFormField,
+              itemBuilder: (context) => config.formFieldItems.map((item) {
+                return PopupMenuItem<String>(
+                  value: item.value as String,
+                  child: Row(
+                    children: [
+                      if (item.icon != null) Icon(item.icon, size: 20),
+                      SizedBox(width: 8),
+                      Text(item.label),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+
+          // Add print mode toggle
+          if (config.showPrintModeToggle) ...[
+            SizedBox(width: config.largeSpacerWidth),
+            IntrinsicWidth(
+              child: Row(
                 children: [
                   Text(config.printModeLabel),
                   const SizedBox(width: 4),
@@ -551,9 +495,9 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
                   ),
                 ],
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -639,7 +583,7 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
               textAlignVertical: TextAlignVertical.top,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                hintText: 'Enter markdown text...',
+                hintText: widget.controllerConfiguration.editorPlaceholder,
                 alignLabelWithHint: true,
               ),
               onChanged: (value) {

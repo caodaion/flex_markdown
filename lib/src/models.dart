@@ -160,6 +160,7 @@ class TextSpanElement {
   final bool isItalic;
   final String? linkUrl;
   final bool isCode;
+  final bool isUnderline; // Add isUnderline property
   final String? color; // Add color property
 
   TextSpanElement({
@@ -168,6 +169,7 @@ class TextSpanElement {
     required this.isItalic,
     this.linkUrl,
     this.isCode = false,
+    this.isUnderline = false, // Add isUnderline with default false
     this.color, // Add color parameter
   });
 }
