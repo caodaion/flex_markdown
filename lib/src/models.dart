@@ -542,17 +542,68 @@ class TableElement extends MarkdownElement {
 /// Element that contains a mix of text and form elements
 class MixedContentElement extends MarkdownElement {
   final List<MarkdownElement> children;
+  final bool isPrintMode;
 
-  MixedContentElement({required this.children, double baseFontSize = 16.0})
-      : super(baseFontSize: baseFontSize);
+  MixedContentElement({
+    required this.children,
+    this.isPrintMode = false,
+    double baseFontSize = 16.0,
+  }) : super(baseFontSize: baseFontSize);
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      alignment: WrapAlignment.start,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: children.map((element) => element.build(context)).toList(),
-    );
+    if (isPrintMode) {
+      // In print mode, convert all children to a text span tree
+      return Text.rich(
+        TextSpan(
+          children: _buildTextSpans(context),
+          style: TextStyle(fontSize: baseFontSize),
+        ),
+      );
+    } else {
+      // In regular mode, use Wrap layout
+      return Wrap(
+        alignment: WrapAlignment.start,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: children.map((element) => element.build(context)).toList(),
+      );
+    }
+  }
+
+  // Helper method to convert children to TextSpan objects
+  List<InlineSpan> _buildTextSpans(BuildContext context) {
+    List<InlineSpan> spans = [];
+
+    for (var element in children) {
+      if (element is FormattedTextElement) {
+        // FormattedTextElement already creates TextSpans, so we can reuse its logic
+        final textWidget = element.build(context) as Text;
+        if (textWidget.textSpan != null) {
+          spans.add(textWidget.textSpan!);
+        }
+      } else if (element is ParagraphElement) {
+        spans.add(TextSpan(
+          text: element.text,
+          style: TextStyle(fontSize: baseFontSize),
+        ));
+      } else if (element is FormElement) {
+        // Form elements in print mode should be rendered as text
+        final formWidget = element.build(context);
+        if (formWidget is Text) {
+          spans.add(TextSpan(text: formWidget.data));
+        } else {
+          spans.add(WidgetSpan(child: formWidget));
+        }
+      } else {
+        // For other elements, we'll use WidgetSpan as fallback
+        spans.add(WidgetSpan(
+          child: element.build(context),
+          alignment: PlaceholderAlignment.middle,
+        ));
+      }
+    }
+
+    return spans;
   }
 }
 

@@ -819,7 +819,9 @@ class FlexMarkdownParser {
     }
 
     return MixedContentElement(
-        children: elements, baseFontSize: baseFontSize); // Pass base font size
+        children: elements,
+        isPrintMode: isPrintMode, // Pass isPrintMode here
+        baseFontSize: baseFontSize); // Pass base font size
   }
 
   /// Find the earliest valid position, ignoring -1 values

@@ -202,7 +202,21 @@ Select your country: {{select|country|Country|USA,Canada,Mexico,UK,Australia,Jap
 ### Mixed Forms in Paragraph
 This paragraph contains {{textfield|inline_field|inline text field|example}} and also 
 {{checkbox|inline_check|an inline checkbox|true}} mixed with regular text.
+## Long Form with Inline Fields
 
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. In this form you need to provide your {{textfield|full_name|Full Name|John Doe}} and your age: {{textfield|user_age|Age|25}}. The form continues with more details about you.
+
+Your address information includes {{textfield|street|Street Address|123 Main St}}, {{textfield|city|City|Your City}}, {{textfield|state|State|Your State}}, and {{textfield|zip|Zip Code|12345}}. Are you a {{radio|citizen_yes|Citizen|citizenship|true}} or {{radio|citizen_no|Non-Citizen|citizenship|false}} of this country?
+
+Please tell us about your educational background. Highest education level: {{select|education|Education Level|High School,Associates,Bachelors,Masters,PhD}}. Currently enrolled in school? {{checkbox|currently_enrolled|Yes, I am enrolled|false}}. If yes, name of institution: {{textfield|institution|Institution|University Name}}.
+
+For employment status, are you: {{radio|emp_full|Full-time|employment|false}} {{radio|emp_part|Part-time|employment|false}} {{radio|emp_self|Self-employed|employment|false}} {{radio|emp_un|Unemployed|employment|false}} {{radio|emp_retired|Retired|employment|true}}?
+
+Please rate your experience with our services from 1-10: {{textfield|rating|Rating|8}}. Would you recommend us to others? {{checkbox|recommend|Yes, I would recommend|true}}. Please provide any additional comments about how we can improve: {{textfield|comments|Comments|Your service is great but could improve in...}}
+
+By submitting this form, I {{checkbox|terms|agree to the terms and conditions|false}} and {{checkbox|privacy|acknowledge the privacy policy|false}}. Contact preference: {{radio|contact_email|Email|contact|true}} {{radio|contact_phone|Phone|contact|false}} {{radio|contact_mail|Mail|contact|false}}.
+
+Thank you for taking the time to complete this extremely detailed form with various {{textfield|additional_field1|Custom Field 1|Custom value}} and {{textfield|additional_field2|Custom Field 2|Another value}} and even {{textfield|additional_field3|Custom Field 3|Yet another value}} fields mixed into a very long paragraph to demonstrate how inline form elements work in extended text content.
 ---
 
 Built with Flutter and FlexMarkdown.
@@ -224,7 +238,7 @@ Built with Flutter and FlexMarkdown.
               showTextField: true,
               showController: true,
               enableTextSelection: true,
-              isPrintMode: false,
+              isPrintMode: true,
               controllerPosition: MarkdownControllerPosition.above,
               baseFontSize: 16.0,
               formFieldConfigurations: {
@@ -303,6 +317,7 @@ Built with Flutter and FlexMarkdown.
                       ),
                 ),
               },
+              minHeight: 800,
             ),
           ],
         ),
