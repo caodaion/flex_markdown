@@ -661,6 +661,7 @@ class CustomWidgetElement extends MarkdownElement {
   final CustomWidgetBuilder? widgetBuilder;
   final bool isInline;
   final ValueChanged<dynamic>? onValueChanged;
+  Widget? _cachedWidget; // Add this to cache the widget instance
 
   CustomWidgetElement({
     required this.widgetType,
@@ -674,10 +675,18 @@ class CustomWidgetElement extends MarkdownElement {
 
   @override
   Widget build(BuildContext context) {
-    if (widgetBuilder != null) {
-      return widgetBuilder!(context, widgetType, id, params,
-          onValueChanged: onValueChanged);
+    // Use cached widget if available
+    if (_cachedWidget != null) {
+      return _cachedWidget!;
     }
+
+    if (widgetBuilder != null) {
+      // Create and cache the widget
+      _cachedWidget = widgetBuilder!(context, widgetType, id, params,
+          onValueChanged: onValueChanged);
+      return _cachedWidget!;
+    }
+
     // Fallback if no builder is provided
     return Text('Widget: $widgetType (No renderer available)',
         style: TextStyle(color: Colors.red, fontSize: baseFontSize));

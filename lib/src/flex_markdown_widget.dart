@@ -53,10 +53,13 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   late String _currentData;
   Map<String, dynamic> _formValues = {};
   Map<String, dynamic> _widgetValues = {}; // Add this to track widget values
+
+  // Add a map to store custom widget instances
+  Map<String, CustomWidgetElement> _customWidgetInstances = {};
+
   late bool _isPrintMode;
   late double _baseFontSize;
-  late Map<String, FormFieldConfiguration>?
-      _formFieldConfigurations; // Add this
+  late Map<String, FormFieldConfiguration>? _formFieldConfigurations;
   late Map<String, CustomWidgetBuilder>? _customWidgetBuilders;
 
   @override
@@ -102,6 +105,7 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
             _formFieldConfigurations, // Pass configurations to parser
         customWidgetBuilders: _customWidgetBuilders,
         handleWidgetValueChanged: _handleWidgetValueChanged,
+        customWidgetInstances: _customWidgetInstances, // Pass the instances map
       );
     } catch (e) {
       // Handle parsing errors gracefully
@@ -161,6 +165,8 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
 
   @override
   void dispose() {
+    // Clear any stateful widgets we might have created
+    _customWidgetInstances.clear();
     _controller.dispose();
     super.dispose();
   }
