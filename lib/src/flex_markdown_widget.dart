@@ -52,7 +52,6 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   late TextEditingController _controller;
   late String _currentData;
   Map<String, dynamic> _formValues = {};
-  Map<String, dynamic> _widgetValues = {}; // Add this to track widget values
 
   // Add a map to store custom widget instances
   Map<String, CustomWidgetElement> _customWidgetInstances = {};
