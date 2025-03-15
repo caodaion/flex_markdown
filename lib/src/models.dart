@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
@@ -590,9 +592,26 @@ class MixedContentElement extends MarkdownElement {
         // Form elements in print mode should be rendered as text
         final formWidget = element.build(context);
         if (formWidget is Text) {
-          spans.add(TextSpan(text: formWidget.data));
+          log(formWidget.toString());
+          spans.add(
+            TextSpan(
+              text: formWidget.data,
+              style: TextStyle(
+                fontSize: baseFontSize,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          );
         } else {
-          spans.add(WidgetSpan(child: formWidget));
+          spans.add(
+            WidgetSpan(
+              child: formWidget,
+              style: TextStyle(
+                fontSize: baseFontSize,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          );
         }
       } else {
         // For other elements, we'll use WidgetSpan as fallback

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import '../models.dart';
 
@@ -60,8 +62,8 @@ class TextFieldElement extends FormElement {
               border: const OutlineInputBorder(),
             ),
             onChanged: (value) {
+              handleFormValueChanged!(id, value, 'textfield');
               if (onValueChanged != null) {
-                handleFormValueChanged!(id, value, 'textfield');
                 onValueChanged!(id, value, 'textfield');
               }
             },
@@ -89,8 +91,8 @@ class TextFieldElement extends FormElement {
               ),
             ),
             onChanged: (value) {
+              handleFormValueChanged!(id, value);
               if (onValueChanged != null) {
-                handleFormValueChanged!(id, value);
                 onValueChanged!(id, value);
               }
             },
@@ -178,8 +180,8 @@ class TextFieldFormElement extends FormElement {
             obscureText: obscureText,
             textCapitalization: textCapitalization,
             onChanged: (newValue) {
+              handleFormValueChanged!(id, newValue, 'textfield');
               if (onValueChanged != null) {
-                handleFormValueChanged!(id, newValue, 'textfield');
                 onValueChanged!(id, newValue, 'textfield');
               }
             },
@@ -247,8 +249,8 @@ class SelectElement extends FormElement {
                       ))
                   .toList(),
               onChanged: (value) {
+                handleFormValueChanged!(id, value);
                 if (value != null && onValueChanged != null) {
-                  handleFormValueChanged!(id, value);
                   onValueChanged!(id, value);
                 }
               },
@@ -282,8 +284,8 @@ class SelectElement extends FormElement {
               )
               .toList(),
           onChanged: (value) {
+            handleFormValueChanged!(id, value);
             if (value != null && onValueChanged != null) {
-              handleFormValueChanged!(id, value);
               onValueChanged!(id, value);
             }
           },
@@ -340,8 +342,8 @@ class CheckboxElement extends FormElement {
                 child: Checkbox(
                   value: initialValue,
                   onChanged: (value) {
+                    handleFormValueChanged!(id, value);
                     if (value != null && onValueChanged != null) {
-                      handleFormValueChanged!(id, value);
                       onValueChanged!(id, value);
                     }
                   },
@@ -362,8 +364,8 @@ class CheckboxElement extends FormElement {
       contentPadding: EdgeInsets.zero,
       dense: true,
       onChanged: (bool? value) {
+        handleFormValueChanged!(id, value);
         if (value != null && onValueChanged != null) {
-          handleFormValueChanged!(id, value);
           onValueChanged!(id, value);
         }
       },
@@ -422,8 +424,8 @@ class RadioElement extends FormElement {
                   value: id,
                   groupValue: selected ? id : null,
                   onChanged: (value) {
+                    handleFormValueChanged!(groupName, id, 'radio');
                     if (value != null && onValueChanged != null) {
-                      handleFormValueChanged!(groupName, id, 'radio');
                       onValueChanged!(groupName, id, 'radio');
                     }
                   },
@@ -444,8 +446,8 @@ class RadioElement extends FormElement {
       dense: true,
       contentPadding: EdgeInsets.zero,
       onChanged: (value) {
+        handleFormValueChanged!(groupName, id, 'radio');
         if (value != null && onValueChanged != null) {
-          handleFormValueChanged!(groupName, id, 'radio');
           onValueChanged!(groupName, id, 'radio');
         }
       },
