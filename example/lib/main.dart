@@ -555,7 +555,6 @@ Built with Flutter and FlexMarkdown.
                           }
                         },
                       );
-                      ;
                     },
                   );
                 },
