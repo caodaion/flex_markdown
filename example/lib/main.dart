@@ -238,7 +238,7 @@ Built with Flutter and FlexMarkdown.
               showTextField: true,
               showController: true,
               enableTextSelection: true,
-              isPrintMode: true,
+              isPrintMode: false,
               controllerPosition: MarkdownControllerPosition.above,
               baseFontSize: 16.0,
               formFieldConfigurations: {
