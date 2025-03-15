@@ -232,6 +232,10 @@ Progress indicator: {{widget:progress|demo_progress|value:75;color:green;showLab
 ### Inline Widgets
 This paragraph contains an inline {{widget:button|inline_button|text:Press;color:red;size:small}} button and a {{widget:chip|demo_chip|label:Flutter;color:blue}} widget.
 
+
+### Change value from dialog widget
+This is an inline custom widget that is can be updated when you click on the next button {{widget:changeable|changeable_widget|value:This is the content before change}}
+
 ---
 
 Built with Flutter and FlexMarkdown.
@@ -515,6 +519,62 @@ Built with Flutter and FlexMarkdown.
                     label: Text(label),
                     backgroundColor: chipColor,
                     labelStyle: TextStyle(color: chipColor),
+                  );
+                },
+                'changeable': (context, type, id, params, {onValueChanged}) {
+                  final initialValue = params['value'] ?? 'Initial value';
+                  String value = initialValue;
+
+                  return StatefulBuilder(
+                    builder: (context, setState) {
+                      return TextButton(
+                        child: Text(value),
+                        onPressed: () async {
+                          final newValue = await showDialog<String>(
+                            context: context,
+                            builder: (context) {
+                              String newValue = value;
+                              return AlertDialog(
+                                title: Text('Change value'),
+                                content: TextField(
+                                  controller: TextEditingController(
+                                    text: value,
+                                  ),
+                                  onChanged: (text) => newValue = text,
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      log(newValue);
+                                      Navigator.pop(context, newValue);
+                                      setState(() {
+                                        value = newValue;
+                                        if (onValueChanged != null) {
+                                          onValueChanged(newValue);
+                                        }
+                                      });
+                                    },
+                                    child: Text('OK'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+
+                          if (newValue != null) {
+                            value = newValue;
+                            if (onValueChanged != null) {
+                              onValueChanged(value);
+                            }
+                          }
+                        },
+                      );
+                      ;
+                    },
                   );
                 },
               },
