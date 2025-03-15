@@ -62,45 +62,14 @@ class FlexMarkdownParser {
           elements.add(element);
           continue;
         } else if (line.contains('<<') && line.contains('>>')) {
-          // Inline widget within text
-          String processedLine = line;
-          StringBuffer textBuffer = StringBuffer();
-          int currentPos = 0;
-
-          for (final match in widgetRegex.allMatches(line)) {
-            // Add text before the widget
-            if (match.start > currentPos) {
-              textBuffer
-                  .write(processedLine.substring(currentPos, match.start));
-              // Add the text as a paragraph element if not empty
-              if (textBuffer.isNotEmpty) {
-                elements.add(processInlineFormatting(textBuffer.toString(),
-                    baseFontSize: baseFontSize));
-                textBuffer.clear();
-              }
-            }
-
-            // Process the widget
-            final widgetContent = match.group(1)!;
-            final element = _createWidgetElement(
-                widgetContent,
-                formValues,
-                handleFormValueChanged,
-                isPrintMode,
-                baseFontSize,
-                customWidgets);
-
-            elements.add(element);
-            currentPos = match.end;
-          }
-
-          // Add any remaining text after the last widget
-          if (currentPos < processedLine.length) {
-            textBuffer.write(processedLine.substring(currentPos));
-            elements.add(processInlineFormatting(textBuffer.toString(),
-                baseFontSize: baseFontSize));
-          }
-
+          // Inline widget within text - process as mixed content
+          elements.add(_processMixedContentWithWidgets(line,
+              formValues: formValues,
+              handleFormValueChanged: handleFormValueChanged,
+              isPrintMode: isPrintMode,
+              baseFontSize: baseFontSize,
+              formFieldConfigurations: formFieldConfigurations,
+              customWidgets: customWidgets));
           continue;
         }
       }
@@ -918,6 +887,95 @@ class FlexMarkdownParser {
         children: elements,
         isPrintMode: isPrintMode, // Pass isPrintMode here
         baseFontSize: baseFontSize); // Pass base font size
+  }
+
+  /// Process text with potentially inline custom widgets and form elements
+  static MarkdownElement _processMixedContentWithWidgets(String text,
+      {Map<String, dynamic>? formValues,
+      FormValueChangedCallback? handleFormValueChanged,
+      bool isPrintMode = false,
+      double baseFontSize = 16.0,
+      Map<String, FormFieldConfiguration>? formFieldConfigurations,
+      Map<String, CustomWidgetBuilder>? customWidgets}) {
+    List<MarkdownElement> elements = [];
+    int currentPos = 0;
+
+    // Process form elements and custom widgets
+    while (currentPos < text.length) {
+      int formStartPos = text.indexOf('{{', currentPos);
+      int widgetStartPos = text.indexOf('<<', currentPos);
+
+      // Determine which comes first or if neither exists
+      int nextElementPos;
+      String startDelimiter;
+      String endDelimiter;
+      bool isFormElement = false;
+
+      if (formStartPos == -1 && widgetStartPos == -1) {
+        // No more special elements, process the rest as formatted text
+        String remainingText = text.substring(currentPos);
+        if (remainingText.isNotEmpty) {
+          elements.add(processInlineFormatting(remainingText,
+              baseFontSize: baseFontSize));
+        }
+        break;
+      } else if (formStartPos == -1 ||
+          (widgetStartPos != -1 && widgetStartPos < formStartPos)) {
+        // Custom widget comes next or only custom widget exists
+        nextElementPos = widgetStartPos;
+        startDelimiter = "<<";
+        endDelimiter = ">>";
+        isFormElement = false;
+      } else {
+        // Form element comes next or only form element exists
+        nextElementPos = formStartPos;
+        startDelimiter = "{{";
+        endDelimiter = "}}";
+        isFormElement = true;
+      }
+
+      // Process text before special element
+      if (nextElementPos > currentPos) {
+        String beforeText = text.substring(currentPos, nextElementPos);
+        elements.add(
+            processInlineFormatting(beforeText, baseFontSize: baseFontSize));
+      }
+
+      // Find the end of the special element
+      int endPos = text.indexOf(endDelimiter, nextElementPos + 2);
+      if (endPos == -1) {
+        // No closing bracket, treat as regular text
+        String remainingText = text.substring(currentPos);
+        elements.add(
+            processInlineFormatting(remainingText, baseFontSize: baseFontSize));
+        break;
+      }
+
+      // Extract and parse the special element
+      String elementContent = text.substring(nextElementPos + 2, endPos);
+
+      if (isFormElement) {
+        // Handle form element
+        elements.add(_parseFormElement(elementContent,
+            isInline: true,
+            formValues: formValues,
+            handleFormValueChanged: handleFormValueChanged,
+            isPrintMode: isPrintMode,
+            formFieldConfigurations: formFieldConfigurations));
+      } else {
+        // Handle custom widget
+        elements.add(_createWidgetElement(elementContent, formValues,
+            handleFormValueChanged, isPrintMode, baseFontSize, customWidgets));
+      }
+
+      // Move position after this element
+      currentPos = endPos + 2;
+    }
+
+    return MixedContentElement(
+        children: elements,
+        isPrintMode: isPrintMode,
+        baseFontSize: baseFontSize);
   }
 
   /// Find the earliest valid position, ignoring -1 values
