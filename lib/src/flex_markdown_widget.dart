@@ -21,6 +21,7 @@ class FlexMarkdownWidget extends StatefulWidget {
   final bool isPrintMode;
   final double baseFontSize;
   final Map<String, FormFieldConfiguration>? formFieldConfigurations;
+  final Map<String, CustomWidgetBuilder>? customWidgetBuilders;
   final double minHeight;
   final MarkdownControllerConfiguration
       controllerConfiguration; // Add this parameter
@@ -36,6 +37,7 @@ class FlexMarkdownWidget extends StatefulWidget {
     this.isPrintMode = false,
     this.baseFontSize = 16.0,
     this.formFieldConfigurations,
+    this.customWidgetBuilders,
     this.minHeight = 360.0,
     this.controllerConfiguration =
         const MarkdownControllerConfiguration(), // Default configuration
@@ -50,10 +52,12 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   late TextEditingController _controller;
   late String _currentData;
   Map<String, dynamic> _formValues = {};
+  Map<String, dynamic> _widgetValues = {}; // Add this to track widget values
   late bool _isPrintMode;
   late double _baseFontSize;
   late Map<String, FormFieldConfiguration>?
       _formFieldConfigurations; // Add this
+  late Map<String, CustomWidgetBuilder>? _customWidgetBuilders;
 
   @override
   void initState() {
@@ -64,6 +68,7 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
     _baseFontSize = widget.baseFontSize;
     _formFieldConfigurations =
         widget.formFieldConfigurations; // Initialize from widget property
+    _customWidgetBuilders = widget.customWidgetBuilders;
     _initializeFormValues(); // Add this to initialize form values from configurations
     _parseMarkdown();
   }
@@ -95,6 +100,8 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
         baseFontSize: _baseFontSize,
         formFieldConfigurations:
             _formFieldConfigurations, // Pass configurations to parser
+        customWidgetBuilders: _customWidgetBuilders,
+        handleWidgetValueChanged: _handleWidgetValueChanged,
       );
     } catch (e) {
       // Handle parsing errors gracefully
@@ -116,6 +123,14 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
       if (_isPrintMode || !isTextField) {
         _parseMarkdown();
       }
+    });
+  }
+
+  // Add method to handle widget value changes
+  void _handleWidgetValueChanged(dynamic value) {
+    setState(() {
+      // Widgets can update their state - we need to re-render
+      _parseMarkdown();
     });
   }
 
@@ -479,6 +494,14 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
               }).toList(),
             ),
 
+          // Add widget button
+          if (config.formFields.visible)
+            IconButton(
+              icon: Icon(Icons.widgets),
+              tooltip: 'Insert Custom Widget',
+              onPressed: _applyCustomWidget,
+            ),
+
           // Add print mode toggle
           if (config.showPrintModeToggle) ...[
             SizedBox(width: config.largeSpacerWidth),
@@ -541,6 +564,11 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
         _applySelect();
         break;
     }
+  }
+
+  void _applyCustomWidget() {
+    _insertInlineElement(
+        '{{widget:button|my_button|text:Click Me;color:blue}}');
   }
 
   Widget _buildMarkdownPreview() {

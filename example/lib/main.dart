@@ -217,6 +217,21 @@ Please rate your experience with our services from 1-10: {{textfield|rating|Rati
 By submitting this form, I {{checkbox|terms|agree to the terms and conditions|false}} and {{checkbox|privacy|acknowledge the privacy policy|false}}. Contact preference: {{radio|contact_email|Email|contact|true}} {{radio|contact_phone|Phone|contact|false}} {{radio|contact_mail|Mail|contact|false}}.
 
 Thank you for taking the time to complete this extremely detailed form with various {{textfield|additional_field1|Custom Field 1|Custom value}} and {{textfield|additional_field2|Custom Field 2|Another value}} and even {{textfield|additional_field3|Custom Field 3|Yet another value}} fields mixed into a very long paragraph to demonstrate how inline form elements work in extended text content.
+
+## Custom Widgets
+
+### Button Widget
+Here's a custom button: {{widget:button|demo_button|text:Click Me!;color:blue;size:large}}
+
+### Counter Widget
+This is a counter widget: {{widget:counter|demo_counter|initialValue:5;label:Count;step:1}}
+
+### Progress Widget
+Progress indicator: {{widget:progress|demo_progress|value:75;color:green;showLabel:true}}
+
+### Inline Widgets
+This paragraph contains an inline {{widget:button|inline_button|text:Press;color:red;size:small}} button and a {{widget:chip|demo_chip|label:Flutter;color:blue}} widget.
+
 ---
 
 Built with Flutter and FlexMarkdown.
@@ -316,6 +331,192 @@ Built with Flutter and FlexMarkdown.
                         'Field "$id" changed to "$value" (${fieldType ?? 'text'})',
                       ),
                 ),
+              },
+              customWidgetBuilders: {
+                'button': (context, type, id, params, {onValueChanged}) {
+                  // Extract parameters with defaults
+                  final text = params['text'] ?? 'Button';
+                  final colorName = params['color'] ?? 'blue';
+                  final size = params['size'] ?? 'medium';
+
+                  // Determine color
+                  Color buttonColor;
+                  switch (colorName) {
+                    case 'red':
+                      buttonColor = Colors.red;
+                      break;
+                    case 'green':
+                      buttonColor = Colors.green;
+                      break;
+                    case 'blue':
+                      buttonColor = Colors.blue;
+                      break;
+                    default:
+                      buttonColor = Colors.blue;
+                  }
+
+                  // Determine size
+                  double fontSize = 14;
+                  EdgeInsets padding = EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  );
+
+                  if (size == 'small') {
+                    fontSize = 12;
+                    padding = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
+                  } else if (size == 'large') {
+                    fontSize = 16;
+                    padding = EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    );
+                  }
+
+                  return ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: buttonColor,
+                      padding: padding,
+                    ),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Button $id pressed!')),
+                      );
+                      if (onValueChanged != null) {
+                        onValueChanged('pressed');
+                      }
+                    },
+                    child: Text(
+                      text,
+                      style: TextStyle(fontSize: fontSize, color: Colors.white),
+                    ),
+                  );
+                },
+                'counter': (context, type, id, params, {onValueChanged}) {
+                  final initialValue = params['initialValue'] ?? 0;
+                  final label = params['label'] ?? 'Counter';
+                  final step = params['step'] ?? 1;
+                  int value = initialValue;
+
+                  return StatefulBuilder(
+                    builder: (context, setState) {
+                      return Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                label,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text('$value', style: TextStyle(fontSize: 24)),
+                              SizedBox(height: 8),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.remove),
+                                    onPressed: () {
+                                      setState(() {
+                                        value--;
+                                        if (onValueChanged != null) {
+                                          onValueChanged(value);
+                                        }
+                                      });
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.add),
+                                    onPressed: () {
+                                      setState(() {
+                                        value++;
+                                        if (onValueChanged != null) {
+                                          onValueChanged(value);
+                                        }
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                'progress': (context, type, id, params, {onValueChanged}) {
+                  final value = (params['value'] ?? 0) / 100.0;
+                  final colorName = params['color'] ?? 'blue';
+                  final showLabel = params['showLabel'] ?? false;
+
+                  // Determine color
+                  Color progressColor;
+                  switch (colorName) {
+                    case 'red':
+                      progressColor = Colors.red;
+                      break;
+                    case 'green':
+                      progressColor = Colors.green;
+                      break;
+                    case 'blue':
+                      progressColor = Colors.blue;
+                      break;
+                    default:
+                      progressColor = Colors.blue;
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showLabel == true)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: Text('${(value * 100).toInt()}%'),
+                        ),
+                      LinearProgressIndicator(
+                        value: value,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          progressColor,
+                        ),
+                        backgroundColor: Colors.grey[200],
+                        minHeight: 10,
+                      ),
+                    ],
+                  );
+                },
+                'chip': (context, type, id, params, {onValueChanged}) {
+                  final label = params['label'] ?? 'Chip';
+                  final colorName = params['color'] ?? 'blue';
+
+                  // Determine color
+                  Color chipColor;
+                  switch (colorName) {
+                    case 'red':
+                      chipColor = Colors.red;
+                      break;
+                    case 'green':
+                      chipColor = Colors.green;
+                      break;
+                    case 'blue':
+                      chipColor = Colors.blue;
+                      break;
+                    default:
+                      chipColor = Colors.blue;
+                  }
+
+                  return Chip(
+                    label: Text(label),
+                    backgroundColor: chipColor,
+                    labelStyle: TextStyle(color: chipColor),
+                  );
+                },
               },
               minHeight: 800,
             ),

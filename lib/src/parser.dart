@@ -12,9 +12,9 @@ class FlexMarkdownParser {
       FormValueChangedCallback? handleFormValueChanged,
       bool isPrintMode = false,
       double baseFontSize = 16.0,
-      Map<String, FormFieldConfiguration>? formFieldConfigurations}) {
-    // Add this parameter
-
+      Map<String, FormFieldConfiguration>? formFieldConfigurations,
+      Map<String, CustomWidgetBuilder>? customWidgetBuilders,
+      ValueChanged<dynamic>? handleWidgetValueChanged}) {
     List<MarkdownElement> elements = [];
     List<String> lines = markdown.split('\n');
 
@@ -55,8 +55,10 @@ class FlexMarkdownParser {
               formValues: formValues,
               isPrintMode: isPrintMode,
               baseFontSize: baseFontSize,
-              formFieldConfigurations:
-                  formFieldConfigurations); // Pass formFieldConfigurations
+              formFieldConfigurations: formFieldConfigurations,
+              customWidgetBuilders: customWidgetBuilders,
+              handleWidgetValueChanged:
+                  handleWidgetValueChanged); // Pass formFieldConfigurations
           elements.add(IndentElement(
             indentWidth: indentAmount,
             content: mixedContent,
@@ -333,8 +335,10 @@ class FlexMarkdownParser {
               formValues: formValues,
               isPrintMode: isPrintMode,
               baseFontSize: baseFontSize,
-              formFieldConfigurations:
-                  formFieldConfigurations); // Pass formFieldConfigurations
+              formFieldConfigurations: formFieldConfigurations,
+              customWidgetBuilders: customWidgetBuilders,
+              handleWidgetValueChanged:
+                  handleWidgetValueChanged); // Pass formFieldConfigurations
           elements.add(CenterElement(child: mixedContent));
         } else {
           // Process inline formatting for the centered text (no form elements)
@@ -354,7 +358,11 @@ class FlexMarkdownParser {
           elements.add(_parseFormElement(formContent,
               handleFormValueChanged: handleFormValueChanged,
               formValues: formValues,
-              isPrintMode: isPrintMode)); // Pass isPrintMode
+              isPrintMode: isPrintMode,
+              formFieldConfigurations: formFieldConfigurations,
+              customWidgetBuilders: customWidgetBuilders,
+              handleWidgetValueChanged:
+                  handleWidgetValueChanged)); // Pass isPrintMode
         } else {
           // Inline form element - process as mixed content
           elements.add(_processMixedContent(line,
@@ -362,8 +370,10 @@ class FlexMarkdownParser {
               formValues: formValues,
               isPrintMode: isPrintMode,
               baseFontSize: baseFontSize,
-              formFieldConfigurations:
-                  formFieldConfigurations)); // Pass formFieldConfigurations
+              formFieldConfigurations: formFieldConfigurations,
+              customWidgetBuilders: customWidgetBuilders,
+              handleWidgetValueChanged:
+                  handleWidgetValueChanged)); // Pass formFieldConfigurations
         }
         continue;
       }
@@ -792,7 +802,9 @@ class FlexMarkdownParser {
       FormValueChangedCallback? handleFormValueChanged,
       bool isPrintMode = false,
       double baseFontSize = 16.0,
-      Map<String, FormFieldConfiguration>? formFieldConfigurations}) {
+      Map<String, FormFieldConfiguration>? formFieldConfigurations,
+      Map<String, CustomWidgetBuilder>? customWidgetBuilders,
+      ValueChanged<dynamic>? handleWidgetValueChanged}) {
     // Add this parameter
 
     // Added isPrintMode parameter
@@ -842,8 +854,10 @@ class FlexMarkdownParser {
           formValues: formValues,
           handleFormValueChanged: handleFormValueChanged,
           isPrintMode: isPrintMode,
-          formFieldConfigurations:
-              formFieldConfigurations)); // Pass formFieldConfigurations
+          formFieldConfigurations: formFieldConfigurations,
+          customWidgetBuilders: customWidgetBuilders,
+          handleWidgetValueChanged:
+              handleWidgetValueChanged)); // Pass formFieldConfigurations
 
       // Move position after this form element
       currentPos = formEndPos + 2;
@@ -882,10 +896,22 @@ class FlexMarkdownParser {
       Map<String, dynamic>? formValues,
       FormValueChangedCallback? handleFormValueChanged,
       bool isPrintMode = false,
-      Map<String, FormFieldConfiguration>? formFieldConfigurations}) {
+      Map<String, FormFieldConfiguration>? formFieldConfigurations,
+      Map<String, CustomWidgetBuilder>? customWidgetBuilders,
+      ValueChanged<dynamic>? handleWidgetValueChanged}) {
     // Add this parameter
 
     // Added isPrintMode parameter
+    // Check if it's a custom widget (starts with "widget:")
+    if (formContent.startsWith('widget:')) {
+      // Strip the 'widget:' prefix
+      String content = formContent.substring(7);
+      return _parseCustomWidget(content,
+          isInline: isInline,
+          customWidgetBuilders: customWidgetBuilders,
+          handleWidgetValueChanged: handleWidgetValueChanged);
+    }
+
     List<String> parts = formContent.split('|');
     String type = parts[0].trim().toLowerCase();
     String id = parts.length > 1 ? parts[1].trim() : 'default_id';
@@ -1055,6 +1081,70 @@ class FlexMarkdownParser {
       default:
         return ParagraphElement(text: 'Unsupported form element: $type');
     }
+  }
+
+  /// Parse custom widget element syntax
+  static MarkdownElement _parseCustomWidget(String content,
+      {bool isInline = false,
+      Map<String, CustomWidgetBuilder>? customWidgetBuilders,
+      ValueChanged<dynamic>? handleWidgetValueChanged}) {
+    // Extract widget type, id, and parameters
+    List<String> parts = content.split('|');
+    if (parts.isEmpty) {
+      return ParagraphElement(text: 'Invalid widget syntax');
+    }
+
+    String widgetType = parts[0].trim();
+    String id = parts.length > 1 ? parts[1].trim() : '';
+
+    // Parse parameters
+    Map<String, dynamic> params = {};
+    if (parts.length > 2) {
+      String paramStr = parts.sublist(2).join('|');
+      // Try to split by semicolons for multiple parameters
+      List<String> paramPairs = paramStr.split(';');
+      for (var pair in paramPairs) {
+        List<String> keyValue = pair.split(':');
+        if (keyValue.length == 2) {
+          // Try to parse as int or double or bool, fallback to string
+          String value = keyValue[1].trim();
+          dynamic parsedValue = value;
+
+          if (value.toLowerCase() == 'true') {
+            parsedValue = true;
+          } else if (value.toLowerCase() == 'false') {
+            parsedValue = false;
+          } else {
+            try {
+              parsedValue = int.parse(value);
+            } catch (_) {
+              try {
+                parsedValue = double.parse(value);
+              } catch (_) {
+                // Keep as string
+              }
+            }
+          }
+
+          params[keyValue[0].trim()] = parsedValue;
+        }
+      }
+    }
+
+    // Get the custom widget builder if available
+    CustomWidgetBuilder? builder = customWidgetBuilders != null &&
+            customWidgetBuilders.containsKey(widgetType)
+        ? customWidgetBuilders[widgetType]
+        : null;
+
+    return CustomWidgetElement(
+      widgetType: widgetType,
+      id: id,
+      params: params,
+      widgetBuilder: builder,
+      isInline: isInline,
+      onValueChanged: handleWidgetValueChanged,
+    );
   }
 
   // Helper method to get indent level of a line

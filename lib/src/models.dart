@@ -9,6 +9,11 @@ import 'package:url_launcher/url_launcher.dart' as url_launcher;
 typedef FormValueChangedCallback = void Function(String id, dynamic value,
     [String? fieldType]);
 
+/// Callback for custom widget builders
+typedef CustomWidgetBuilder = Widget Function(BuildContext context,
+    String widgetType, String id, Map<String, dynamic> params,
+    {ValueChanged<dynamic>? onValueChanged});
+
 /// Base class for all markdown elements
 abstract class MarkdownElement {
   final double baseFontSize;
@@ -645,5 +650,36 @@ class IndentElement extends MarkdownElement {
       width: double.infinity,
       child: content.build(context),
     );
+  }
+}
+
+/// Element that contains a custom widget
+class CustomWidgetElement extends MarkdownElement {
+  final String widgetType;
+  final String id;
+  final Map<String, dynamic> params;
+  final CustomWidgetBuilder? widgetBuilder;
+  final bool isInline;
+  final ValueChanged<dynamic>? onValueChanged;
+
+  CustomWidgetElement({
+    required this.widgetType,
+    required this.id,
+    this.params = const {},
+    this.widgetBuilder,
+    this.isInline = false,
+    this.onValueChanged,
+    double baseFontSize = 16.0,
+  }) : super(baseFontSize: baseFontSize);
+
+  @override
+  Widget build(BuildContext context) {
+    if (widgetBuilder != null) {
+      return widgetBuilder!(context, widgetType, id, params,
+          onValueChanged: onValueChanged);
+    }
+    // Fallback if no builder is provided
+    return Text('Widget: $widgetType (No renderer available)',
+        style: TextStyle(color: Colors.red, fontSize: baseFontSize));
   }
 }
