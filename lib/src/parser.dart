@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:flex_markdown/src/models/widget_element.dart';
 import 'package:flutter/widgets.dart';
 import 'models.dart';
 import 'widgets/form_elements.dart';
@@ -14,9 +13,9 @@ class FlexMarkdownParser {
       bool isPrintMode = false,
       double baseFontSize = 16.0,
       Map<String, FormFieldConfiguration>? formFieldConfigurations,
-      Map<String, CustomWidgetBuilder>? customWidgets}) {
-    // Add this parameter
-
+      Map<String, CustomWidgetBuilder>? customWidgetBuilders,
+      ValueChanged<dynamic>? handleWidgetValueChanged,
+      Map<String, CustomWidgetElement>? customWidgetInstances}) {
     List<MarkdownElement> elements = [];
     List<String> lines = markdown.split('\n');
 
@@ -39,40 +38,8 @@ class FlexMarkdownParser {
     bool inTable = false;
     List<List<String>> tableRows = [];
 
-    // Remove the call to _processWidgetElements from here
-
     for (int i = 0; i < lines.length; i++) {
       String line = lines[i];
-
-      // Process custom widgets (<<...>>)
-      if (line.contains('<<') && line.contains('>>')) {
-        final RegExp widgetRegex = RegExp(r'<<(.*?)>>');
-
-        // Check if the widget is the entire line or part of a paragraph
-        if (widgetRegex.hasMatch(line.trim()) &&
-            line.trim().startsWith('<<') &&
-            line.trim().endsWith('>>')) {
-          // Standalone widget
-          final match = widgetRegex.firstMatch(line.trim())!;
-          final widgetContent = match.group(1)!;
-
-          final element = _createWidgetElement(widgetContent, formValues,
-              handleFormValueChanged, isPrintMode, baseFontSize, customWidgets);
-
-          elements.add(element);
-          continue;
-        } else if (line.contains('<<') && line.contains('>>')) {
-          // Inline widget within text - process as mixed content
-          elements.add(_processMixedContentWithWidgets(line,
-              formValues: formValues,
-              handleFormValueChanged: handleFormValueChanged,
-              isPrintMode: isPrintMode,
-              baseFontSize: baseFontSize,
-              formFieldConfigurations: formFieldConfigurations,
-              customWidgets: customWidgets));
-          continue;
-        }
-      }
 
       // Process indent syntax [[indent|20|content]]
       final RegExp indentRegex = RegExp(r'^\[\[indent\|(\d+)\|(.*)\]\]$');
@@ -89,8 +56,11 @@ class FlexMarkdownParser {
               formValues: formValues,
               isPrintMode: isPrintMode,
               baseFontSize: baseFontSize,
-              formFieldConfigurations:
-                  formFieldConfigurations); // Pass formFieldConfigurations
+              formFieldConfigurations: formFieldConfigurations,
+              customWidgetBuilders: customWidgetBuilders,
+              handleWidgetValueChanged: handleWidgetValueChanged,
+              customWidgetInstances:
+                  customWidgetInstances); // Pass formFieldConfigurations
           elements.add(IndentElement(
             indentWidth: indentAmount,
             content: mixedContent,
@@ -367,8 +337,11 @@ class FlexMarkdownParser {
               formValues: formValues,
               isPrintMode: isPrintMode,
               baseFontSize: baseFontSize,
-              formFieldConfigurations:
-                  formFieldConfigurations); // Pass formFieldConfigurations
+              formFieldConfigurations: formFieldConfigurations,
+              customWidgetBuilders: customWidgetBuilders,
+              handleWidgetValueChanged: handleWidgetValueChanged,
+              customWidgetInstances:
+                  customWidgetInstances); // Pass formFieldConfigurations
           elements.add(CenterElement(child: mixedContent));
         } else {
           // Process inline formatting for the centered text (no form elements)
@@ -388,7 +361,12 @@ class FlexMarkdownParser {
           elements.add(_parseFormElement(formContent,
               handleFormValueChanged: handleFormValueChanged,
               formValues: formValues,
-              isPrintMode: isPrintMode)); // Pass isPrintMode
+              isPrintMode: isPrintMode,
+              formFieldConfigurations: formFieldConfigurations,
+              customWidgetBuilders: customWidgetBuilders,
+              handleWidgetValueChanged: handleWidgetValueChanged,
+              customWidgetInstances:
+                  customWidgetInstances)); // Pass isPrintMode
         } else {
           // Inline form element - process as mixed content
           elements.add(_processMixedContent(line,
@@ -396,8 +374,11 @@ class FlexMarkdownParser {
               formValues: formValues,
               isPrintMode: isPrintMode,
               baseFontSize: baseFontSize,
-              formFieldConfigurations:
-                  formFieldConfigurations)); // Pass formFieldConfigurations
+              formFieldConfigurations: formFieldConfigurations,
+              customWidgetBuilders: customWidgetBuilders,
+              handleWidgetValueChanged: handleWidgetValueChanged,
+              customWidgetInstances:
+                  customWidgetInstances)); // Pass formFieldConfigurations
         }
         continue;
       }
@@ -826,7 +807,10 @@ class FlexMarkdownParser {
       FormValueChangedCallback? handleFormValueChanged,
       bool isPrintMode = false,
       double baseFontSize = 16.0,
-      Map<String, FormFieldConfiguration>? formFieldConfigurations}) {
+      Map<String, FormFieldConfiguration>? formFieldConfigurations,
+      Map<String, CustomWidgetBuilder>? customWidgetBuilders,
+      ValueChanged<dynamic>? handleWidgetValueChanged,
+      Map<String, CustomWidgetElement>? customWidgetInstances}) {
     // Add this parameter
 
     // Added isPrintMode parameter
@@ -876,8 +860,11 @@ class FlexMarkdownParser {
           formValues: formValues,
           handleFormValueChanged: handleFormValueChanged,
           isPrintMode: isPrintMode,
-          formFieldConfigurations:
-              formFieldConfigurations)); // Pass formFieldConfigurations
+          formFieldConfigurations: formFieldConfigurations,
+          customWidgetBuilders: customWidgetBuilders,
+          handleWidgetValueChanged: handleWidgetValueChanged,
+          customWidgetInstances:
+              customWidgetInstances)); // Pass formFieldConfigurations
 
       // Move position after this form element
       currentPos = formEndPos + 2;
@@ -887,95 +874,6 @@ class FlexMarkdownParser {
         children: elements,
         isPrintMode: isPrintMode, // Pass isPrintMode here
         baseFontSize: baseFontSize); // Pass base font size
-  }
-
-  /// Process text with potentially inline custom widgets and form elements
-  static MarkdownElement _processMixedContentWithWidgets(String text,
-      {Map<String, dynamic>? formValues,
-      FormValueChangedCallback? handleFormValueChanged,
-      bool isPrintMode = false,
-      double baseFontSize = 16.0,
-      Map<String, FormFieldConfiguration>? formFieldConfigurations,
-      Map<String, CustomWidgetBuilder>? customWidgets}) {
-    List<MarkdownElement> elements = [];
-    int currentPos = 0;
-
-    // Process form elements and custom widgets
-    while (currentPos < text.length) {
-      int formStartPos = text.indexOf('{{', currentPos);
-      int widgetStartPos = text.indexOf('<<', currentPos);
-
-      // Determine which comes first or if neither exists
-      int nextElementPos;
-      String startDelimiter;
-      String endDelimiter;
-      bool isFormElement = false;
-
-      if (formStartPos == -1 && widgetStartPos == -1) {
-        // No more special elements, process the rest as formatted text
-        String remainingText = text.substring(currentPos);
-        if (remainingText.isNotEmpty) {
-          elements.add(processInlineFormatting(remainingText,
-              baseFontSize: baseFontSize));
-        }
-        break;
-      } else if (formStartPos == -1 ||
-          (widgetStartPos != -1 && widgetStartPos < formStartPos)) {
-        // Custom widget comes next or only custom widget exists
-        nextElementPos = widgetStartPos;
-        startDelimiter = "<<";
-        endDelimiter = ">>";
-        isFormElement = false;
-      } else {
-        // Form element comes next or only form element exists
-        nextElementPos = formStartPos;
-        startDelimiter = "{{";
-        endDelimiter = "}}";
-        isFormElement = true;
-      }
-
-      // Process text before special element
-      if (nextElementPos > currentPos) {
-        String beforeText = text.substring(currentPos, nextElementPos);
-        elements.add(
-            processInlineFormatting(beforeText, baseFontSize: baseFontSize));
-      }
-
-      // Find the end of the special element
-      int endPos = text.indexOf(endDelimiter, nextElementPos + 2);
-      if (endPos == -1) {
-        // No closing bracket, treat as regular text
-        String remainingText = text.substring(currentPos);
-        elements.add(
-            processInlineFormatting(remainingText, baseFontSize: baseFontSize));
-        break;
-      }
-
-      // Extract and parse the special element
-      String elementContent = text.substring(nextElementPos + 2, endPos);
-
-      if (isFormElement) {
-        // Handle form element
-        elements.add(_parseFormElement(elementContent,
-            isInline: true,
-            formValues: formValues,
-            handleFormValueChanged: handleFormValueChanged,
-            isPrintMode: isPrintMode,
-            formFieldConfigurations: formFieldConfigurations));
-      } else {
-        // Handle custom widget
-        elements.add(_createWidgetElement(elementContent, formValues,
-            handleFormValueChanged, isPrintMode, baseFontSize, customWidgets));
-      }
-
-      // Move position after this element
-      currentPos = endPos + 2;
-    }
-
-    return MixedContentElement(
-        children: elements,
-        isPrintMode: isPrintMode,
-        baseFontSize: baseFontSize);
   }
 
   /// Find the earliest valid position, ignoring -1 values
@@ -1005,10 +903,24 @@ class FlexMarkdownParser {
       Map<String, dynamic>? formValues,
       FormValueChangedCallback? handleFormValueChanged,
       bool isPrintMode = false,
-      Map<String, FormFieldConfiguration>? formFieldConfigurations}) {
+      Map<String, FormFieldConfiguration>? formFieldConfigurations,
+      Map<String, CustomWidgetBuilder>? customWidgetBuilders,
+      ValueChanged<dynamic>? handleWidgetValueChanged,
+      Map<String, CustomWidgetElement>? customWidgetInstances}) {
     // Add this parameter
 
     // Added isPrintMode parameter
+    // Check if it's a custom widget (starts with "widget:")
+    if (formContent.startsWith('widget:')) {
+      // Strip the 'widget:' prefix
+      String content = formContent.substring(7);
+      return _parseCustomWidget(content,
+          isInline: isInline,
+          customWidgetBuilders: customWidgetBuilders,
+          handleWidgetValueChanged: handleWidgetValueChanged,
+          customWidgetInstances: customWidgetInstances);
+    }
+
     List<String> parts = formContent.split('|');
     String type = parts[0].trim().toLowerCase();
     String id = parts.length > 1 ? parts[1].trim() : 'default_id';
@@ -1180,6 +1092,85 @@ class FlexMarkdownParser {
     }
   }
 
+  /// Parse custom widget element syntax
+  static MarkdownElement _parseCustomWidget(String content,
+      {bool isInline = false,
+      Map<String, CustomWidgetBuilder>? customWidgetBuilders,
+      ValueChanged<dynamic>? handleWidgetValueChanged,
+      Map<String, CustomWidgetElement>? customWidgetInstances}) {
+    // Extract widget type, id, and parameters
+    List<String> parts = content.split('|');
+    if (parts.isEmpty) {
+      return ParagraphElement(text: 'Invalid widget syntax');
+    }
+
+    String widgetType = parts[0].trim();
+    String id = parts.length > 1 ? parts[1].trim() : '';
+
+    // Check if we already have an instance of this widget
+    if (customWidgetInstances != null &&
+        customWidgetInstances.containsKey('$widgetType:$id')) {
+      return customWidgetInstances['$widgetType:$id']!;
+    }
+
+    // Parse parameters
+    Map<String, dynamic> params = {};
+    if (parts.length > 2) {
+      String paramStr = parts.sublist(2).join('|');
+      // Try to split by semicolons for multiple parameters
+      List<String> paramPairs = paramStr.split(';');
+      for (var pair in paramPairs) {
+        List<String> keyValue = pair.split(':');
+        if (keyValue.length == 2) {
+          // Try to parse as int or double or bool, fallback to string
+          String value = keyValue[1].trim();
+          dynamic parsedValue = value;
+
+          if (value.toLowerCase() == 'true') {
+            parsedValue = true;
+          } else if (value.toLowerCase() == 'false') {
+            parsedValue = false;
+          } else {
+            try {
+              parsedValue = int.parse(value);
+            } catch (_) {
+              try {
+                parsedValue = double.parse(value);
+              } catch (_) {
+                // Keep as string
+              }
+            }
+          }
+
+          params[keyValue[0].trim()] = parsedValue;
+        }
+      }
+    }
+
+    // Get the custom widget builder if available
+    CustomWidgetBuilder? builder = customWidgetBuilders != null &&
+            customWidgetBuilders.containsKey(widgetType)
+        ? customWidgetBuilders[widgetType]
+        : null;
+
+    // Create new widget instance
+    CustomWidgetElement widgetElement = CustomWidgetElement(
+      widgetType: widgetType,
+      id: id,
+      params: params,
+      widgetBuilder: builder,
+      isInline: isInline,
+      onValueChanged: handleWidgetValueChanged,
+    );
+
+    // Store the instance for future reuse
+    if (customWidgetInstances != null) {
+      customWidgetInstances['$widgetType:$id'] = widgetElement;
+    }
+
+    return widgetElement;
+  }
+
   // Helper method to get indent level of a line
   static int _getIndentLevel(String line) {
     int spaces = 0;
@@ -1236,49 +1227,5 @@ class FlexMarkdownParser {
       _addNestedListItem(parent.nestedItems!.last, content, remainingDepth - 1,
           isOrderedItem: isOrderedItem);
     }
-  }
-
-  // Add to your existing regex patterns
-  static final RegExp _widgetPattern = RegExp(r'<<(.*?)>>');
-
-  // This method is now only used internally by the widget processing code
-  static CustomWidgetElement _createWidgetElement(
-    String widgetContent,
-    Map<String, dynamic>? formValues,
-    FormValueChangedCallback? handleFormValueChanged,
-    bool isPrintMode,
-    double baseFontSize,
-    Map<String, CustomWidgetBuilder>? customWidgets,
-  ) {
-    List<String> parts = widgetContent.split('|');
-    String widgetName = parts[0].trim();
-    bool isInline = false;
-    Map<String, String> parameters = {};
-
-    // Process parameters
-    for (int i = 1; i < parts.length; i++) {
-      final param = parts[i].trim();
-
-      if (param == 'inline') {
-        isInline = true;
-        continue;
-      }
-
-      // Check for key=value pattern
-      if (param.contains('=')) {
-        final keyValue = param.split('=');
-        if (keyValue.length == 2) {
-          parameters[keyValue[0].trim()] = keyValue[1].trim();
-        }
-      }
-    }
-
-    return CustomWidgetElement(
-      widgetName: widgetName,
-      parameters: parameters,
-      isInline: isInline,
-      customWidgets: customWidgets,
-      baseFontSize: baseFontSize,
-    );
   }
 }

@@ -10,20 +10,28 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      title: 'Flex Markdown | CaoDaiON',
+      theme: ThemeData(),
+      home: const MyHomePage(title: 'Flex Markdown Demo'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
+
+  // This widget is the home page of your application. It is stateful, meaning
+  // that it has a State object (defined below) that contains fields that affect
+  // how it looks.
+
+  // This class is the configuration for the state. It holds the values (in this
+  // case the title) provided by the parent (in this case the App widget) and
+  // used by the build method of the State. Fields in a Widget subclass are
+  // always marked "final".
 
   final String title;
 
@@ -33,11 +41,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  // Add a new counter variable for the StatefulBuilder
-  int _builderCounter = 0;
 
   void _incrementCounter() {
     setState(() {
+      // This call to setState tells the Flutter framework that something has
+      // changed in this State, which causes it to rerun the build method below
+      // so that the display can reflect the updated values. If we changed
+      // _counter without calling setState(), then the build method would not be
+      // called again, and so nothing would appear to happen.
       _counter++;
     });
   }
@@ -192,30 +203,21 @@ Thank you for taking the time to complete this extremely detailed form with vari
 
 ## Custom Widgets
 
+### Button Widget
+Here's a custom button: {{widget:button|demo_button|text:Click Me!;color:blue;size:large}}
+
+### Counter Widget
+This is a counter widget: {{widget:counter|demo_counter|initialValue:5;label:Count;step:1}}
+
+### Progress Widget
+Progress indicator: {{widget:progress|demo_progress|value:75;color:green;showLabel:true}}
+
 ### Inline Widgets
-This paragraph contains an inline button <<button|inline|label=Click Me!|color=blue>> that can be clicked.
+This paragraph contains an inline {{widget:button|inline_button|text:Press;color:red;size:small}} button and a {{widget:chip|demo_chip|label:Flutter;color:blue}} widget.
 
-You can also use other inline widgets like badges <<badge|inline|text=New|color=red>> or chips <<chip|inline|label=Flutter|avatar=F>>.
 
-### Block-Level Widgets
-Below is a block-level custom container:
-
-<<container|bg=lightblue|border=rounded|height=100>>
-
-And here's a custom card widget:
-
-<<card|title=Custom Card|subtitle=This is a card widget|image=https://via.placeholder.com/150>>
-
-### Interactive Widgets
-This counter widget is interactive: <<counter|value=0|label=Current count:>>
-
-Here's a button that changes its label when clicked: <<changeable_button|label=Click to Change Me|color=purple>>
-
-### Styling Widgets
-You can pass styling parameters:
-
-<<button|label=Styled Button|color=green|fontSize=18|borderRadius=8>>
-
+### Change value from dialog widget
+This is an inline custom widget that is can be updated when you click on the next button {{widget:changeable|changeable_widget|value:This is the content before change}}
 
 ---
 
@@ -230,53 +232,10 @@ Built with Flutter and FlexMarkdown.
       body: SingleChildScrollView(
         child: Column(
           children: [
-            StatefulBuilder(
-              builder: (context, setState) {
-                return Container(
-                  padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'COUNTER VALUE: $_builderCounter',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove),
-                            onPressed: () {
-                              setState(() => _builderCounter--);
-                              log(
-                                'Counter decremented. New value: $_builderCounter',
-                              );
-                            },
-                          ),
-                          const SizedBox(width: 16),
-                          IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              setState(() => _builderCounter++);
-                              log(
-                                'Counter incremented. New value: $_builderCounter',
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
             FlexMarkdownWidget(
+              // Required parameter
               data: markdownData,
+              // Optional parameters
               isHorizontalLayout: true,
               showTextField: true,
               showController: true,
@@ -360,320 +319,241 @@ Built with Flutter and FlexMarkdown.
                       ),
                 ),
               },
-              customWidgets: {
-                'button': (context, params) {
-                  final label = params['label'] ?? 'Button';
-                  final color = params['color'] ?? 'blue';
-                  final fontSize =
-                      double.tryParse(params['fontSize'] ?? '') ?? 14.0;
-                  final borderRadius =
-                      double.tryParse(params['borderRadius'] ?? '') ?? 4.0;
+              customWidgetBuilders: {
+                'button': (context, type, id, params, {onValueChanged}) {
+                  // Extract parameters with defaults
+                  final text = params['text'] ?? 'Button';
+                  final colorName = params['color'] ?? 'blue';
+                  final size = params['size'] ?? 'medium';
 
+                  // Determine color
                   Color buttonColor;
-                  switch (color.toLowerCase()) {
-                    case 'blue':
-                      buttonColor = Colors.blue;
-                      break;
+                  switch (colorName) {
                     case 'red':
                       buttonColor = Colors.red;
                       break;
                     case 'green':
                       buttonColor = Colors.green;
                       break;
+                    case 'blue':
+                      buttonColor = Colors.blue;
+                      break;
                     default:
                       buttonColor = Colors.blue;
+                  }
+
+                  // Determine size
+                  double fontSize = 14;
+                  EdgeInsets padding = EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  );
+
+                  if (size == 'small') {
+                    fontSize = 12;
+                    padding = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
+                  } else if (size == 'large') {
+                    fontSize = 16;
+                    padding = EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    );
                   }
 
                   return ElevatedButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Button "$label" pressed!')),
-                      );
-                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: buttonColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(borderRadius),
-                      ),
+                      padding: padding,
                     ),
-                    child: Text(label, style: TextStyle(fontSize: fontSize)),
-                  );
-                },
-
-                'badge': (context, params) {
-                  final text = params['text'] ?? 'Badge';
-                  final color = params['color'] ?? 'blue';
-
-                  Color badgeColor = Colors.blue;
-                  switch (color.toLowerCase()) {
-                    case 'red':
-                      badgeColor = Colors.red;
-                      break;
-                    case 'green':
-                      badgeColor = Colors.green;
-                      break;
-                    case 'orange':
-                      badgeColor = Colors.orange;
-                      break;
-                  }
-
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: badgeColor,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Button $id pressed!')),
+                      );
+                      if (onValueChanged != null) {
+                        onValueChanged('pressed');
+                      }
+                    },
                     child: Text(
                       text,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(fontSize: fontSize, color: Colors.white),
                     ),
                   );
                 },
-
-                'chip': (context, params) {
-                  final label = params['label'] ?? 'Chip';
-                  final avatar = params['avatar'];
-
-                  return Chip(
-                    avatar:
-                        avatar != null
-                            ? CircleAvatar(child: Text(avatar[0]))
-                            : null,
-                    label: Text(label),
-                  );
-                },
-
-                'container': (context, params) {
-                  final bg = params['bg'] ?? 'white';
-                  final border = params['border'] ?? 'none';
-                  final height =
-                      double.tryParse(params['height'] ?? '') ?? 100.0;
-
-                  Color backgroundColor;
-                  switch (bg.toLowerCase()) {
-                    case 'lightblue':
-                      backgroundColor = Colors.lightBlue.shade100;
-                      break;
-                    case 'lightgreen':
-                      backgroundColor = Colors.lightGreen.shade100;
-                      break;
-                    default:
-                      backgroundColor = Colors.white;
-                  }
-
-                  BorderRadius borderRadius;
-                  switch (border.toLowerCase()) {
-                    case 'rounded':
-                      borderRadius = BorderRadius.circular(12);
-                      break;
-                    default:
-                      borderRadius = BorderRadius.zero;
-                  }
-
-                  return Container(
-                    width: double.infinity,
-                    height: height,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: backgroundColor,
-                      borderRadius: borderRadius,
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: const Center(child: Text('Custom Container Widget')),
-                  );
-                },
-
-                'card': (context, params) {
-                  final title = params['title'] ?? 'Card Title';
-                  final subtitle = params['subtitle'] ?? '';
-                  final imageUrl = params['image'];
-
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (imageUrl != null)
-                          Image.network(
-                            imageUrl,
-                            height: 150,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder:
-                                (ctx, error, stack) => Container(
-                                  height: 150,
-                                  color: Colors.grey.shade200,
-                                  child: const Center(
-                                    child: Text('Image not available'),
-                                  ),
-                                ),
-                          ),
-                        ListTile(
-                          title: Text(title),
-                          subtitle: subtitle.isNotEmpty ? Text(subtitle) : null,
-                        ),
-                        ButtonBar(
-                          children: [
-                            TextButton(
-                              onPressed: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Card action pressed!'),
-                                  ),
-                                );
-                              },
-                              child: const Text('ACTION'),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
-
-                'counter': (context, params) {
-                  final initialValue =
-                      int.tryParse(params['value'] ?? '0') ?? 0;
-                  final label = params['label'] ?? 'Count:';
-
-                  // Declare count variable outside the builder to persist its value
-                  int count = initialValue;
+                'counter': (context, type, id, params, {onValueChanged}) {
+                  final initialValue = params['initialValue'] ?? 0;
+                  final label = params['label'] ?? 'Counter';
+                  final step = params['step'] ?? 1;
+                  int value = initialValue;
 
                   return StatefulBuilder(
                     builder: (context, setState) {
-                      return Container(
-                        padding: const EdgeInsets.all(16),
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              '$label $count',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.remove),
-                                  onPressed: () => setState(() => count--),
+                      return Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                label,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                const SizedBox(width: 16),
-                                IconButton(
-                                  icon: const Icon(Icons.add),
-                                  onPressed: () => setState(() => count++),
-                                ),
-                              ],
-                            ),
-                          ],
+                              ),
+                              SizedBox(height: 8),
+                              Text('$value', style: TextStyle(fontSize: 24)),
+                              SizedBox(height: 8),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.remove),
+                                    onPressed: () {
+                                      setState(() {
+                                        value--;
+                                        if (onValueChanged != null) {
+                                          onValueChanged(value);
+                                        }
+                                      });
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.add),
+                                    onPressed: () {
+                                      setState(() {
+                                        value++;
+                                        if (onValueChanged != null) {
+                                          onValueChanged(value);
+                                        }
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
                   );
                 },
+                'progress': (context, type, id, params, {onValueChanged}) {
+                  final value = (params['value'] ?? 0) / 100.0;
+                  final colorName = params['color'] ?? 'blue';
+                  final showLabel = params['showLabel'] ?? false;
 
-                'changeable_button': (context, params) {
-                  // Get initial parameters
-                  final initialLabel = params['label'] ?? 'Changeable Button';
-                  final color = params['color'] ?? 'purple';
-
-                  // Determine button color
-                  Color buttonColor;
-                  switch (color.toLowerCase()) {
-                    case 'purple':
-                      buttonColor = Colors.purple;
-                      break;
-                    case 'blue':
-                      buttonColor = Colors.blue;
-                      break;
+                  // Determine color
+                  Color progressColor;
+                  switch (colorName) {
                     case 'red':
-                      buttonColor = Colors.red;
+                      progressColor = Colors.red;
                       break;
                     case 'green':
-                      buttonColor = Colors.green;
+                      progressColor = Colors.green;
+                      break;
+                    case 'blue':
+                      progressColor = Colors.blue;
                       break;
                     default:
-                      buttonColor = Colors.purple;
+                      progressColor = Colors.blue;
                   }
-                  String currentLabel = initialLabel;
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showLabel == true)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: Text('${(value * 100).toInt()}%'),
+                        ),
+                      LinearProgressIndicator(
+                        value: value,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          progressColor,
+                        ),
+                        backgroundColor: Colors.grey[200],
+                        minHeight: 10,
+                      ),
+                    ],
+                  );
+                },
+                'chip': (context, type, id, params, {onValueChanged}) {
+                  final label = params['label'] ?? 'Chip';
+                  final colorName = params['color'] ?? 'blue';
+
+                  // Determine color
+                  Color chipColor;
+                  switch (colorName) {
+                    case 'red':
+                      chipColor = Colors.red;
+                      break;
+                    case 'green':
+                      chipColor = Colors.green;
+                      break;
+                    case 'blue':
+                      chipColor = Colors.blue;
+                      break;
+                    default:
+                      chipColor = Colors.blue;
+                  }
+
+                  return Chip(
+                    label: Text(label),
+                    backgroundColor: chipColor,
+                    labelStyle: TextStyle(color: chipColor),
+                  );
+                },
+                'changeable': (context, type, id, params, {onValueChanged}) {
+                  final initialValue = params['value'] ?? 'Initial value';
+                  String value = initialValue;
 
                   return StatefulBuilder(
                     builder: (context, setState) {
-                      // Use a variable to store the current label
-
-                      return ElevatedButton(
+                      return TextButton(
+                        child: Text(value),
                         onPressed: () async {
-                          // Show a dialog with text field to change the label
-                          final TextEditingController textController =
-                              TextEditingController(text: currentLabel);
-
-                          final String? newLabel = await showDialog<String>(
+                          final newValue = await showDialog<String>(
                             context: context,
-                            builder: (BuildContext context) {
+                            builder: (context) {
+                              String newValue = value;
                               return AlertDialog(
-                                title: const Text('Change Button Label'),
+                                title: Text('Change value'),
                                 content: TextField(
-                                  controller: textController,
-                                  decoration: const InputDecoration(
-                                    labelText: 'New Label',
+                                  controller: TextEditingController(
+                                    text: value,
                                   ),
-                                  autofocus: true,
+                                  onChanged: (text) => newValue = text,
                                 ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop(null);
-                                    },
-                                    child: const Text('CANCEL'),
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text('Cancel'),
                                   ),
                                   TextButton(
                                     onPressed: () {
-                                      Navigator.of(
-                                        context,
-                                      ).pop(textController.text);
+                                      Navigator.pop(context, newValue);
+                                      setState(() {
+                                        value = newValue;
+                                        if (onValueChanged != null) {
+                                          onValueChanged(newValue);
+                                        }
+                                      });
                                     },
-                                    child: const Text('OK'),
+                                    child: Text('OK'),
                                   ),
                                 ],
                               );
                             },
                           );
 
-                          // Update the button label if a new value was provided
-                          if (newLabel != null && newLabel.isNotEmpty) {
-                            setState(() {
-                              currentLabel = newLabel;
-                            });
-
-                            // Show a confirmation message
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Label updated to: $newLabel'),
-                              ),
-                            );
+                          if (newValue != null) {
+                            value = newValue;
+                            if (onValueChanged != null) {
+                              onValueChanged(value);
+                            }
                           }
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: buttonColor,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                        ),
-                        child: Text(
-                          currentLabel,
-                          style: const TextStyle(color: Colors.white),
-                        ),
                       );
                     },
                   );

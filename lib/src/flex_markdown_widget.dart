@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:flex_markdown/src/models/widget_element.dart';
 import 'package:flutter/material.dart';
 import 'parser.dart';
 import 'models.dart';
@@ -22,10 +21,10 @@ class FlexMarkdownWidget extends StatefulWidget {
   final bool isPrintMode;
   final double baseFontSize;
   final Map<String, FormFieldConfiguration>? formFieldConfigurations;
+  final Map<String, CustomWidgetBuilder>? customWidgetBuilders;
   final double minHeight;
   final MarkdownControllerConfiguration
       controllerConfiguration; // Add this parameter
-  final Map<String, CustomWidgetBuilder>? customWidgets;
 
   const FlexMarkdownWidget({
     Key? key,
@@ -38,10 +37,10 @@ class FlexMarkdownWidget extends StatefulWidget {
     this.isPrintMode = false,
     this.baseFontSize = 16.0,
     this.formFieldConfigurations,
+    this.customWidgetBuilders,
     this.minHeight = 360.0,
     this.controllerConfiguration =
         const MarkdownControllerConfiguration(), // Default configuration
-    this.customWidgets,
   }) : super(key: key);
 
   @override
@@ -53,11 +52,14 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   late TextEditingController _controller;
   late String _currentData;
   Map<String, dynamic> _formValues = {};
+
+  // Add a map to store custom widget instances
+  Map<String, CustomWidgetElement> _customWidgetInstances = {};
+
   late bool _isPrintMode;
   late double _baseFontSize;
-  late Map<String, FormFieldConfiguration>?
-      _formFieldConfigurations; // Add this
-  late Map<String, CustomWidgetBuilder>? _customWidgets;
+  late Map<String, FormFieldConfiguration>? _formFieldConfigurations;
+  late Map<String, CustomWidgetBuilder>? _customWidgetBuilders;
 
   @override
   void initState() {
@@ -68,7 +70,7 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
     _baseFontSize = widget.baseFontSize;
     _formFieldConfigurations =
         widget.formFieldConfigurations; // Initialize from widget property
-    _customWidgets = widget.customWidgets; // Initialize custom widgets
+    _customWidgetBuilders = widget.customWidgetBuilders;
     _initializeFormValues(); // Add this to initialize form values from configurations
     _parseMarkdown();
   }
@@ -100,7 +102,9 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
         baseFontSize: _baseFontSize,
         formFieldConfigurations:
             _formFieldConfigurations, // Pass configurations to parser
-        customWidgets: _customWidgets, // Pass custom widgets to parser
+        customWidgetBuilders: _customWidgetBuilders,
+        handleWidgetValueChanged: _handleWidgetValueChanged,
+        customWidgetInstances: _customWidgetInstances, // Pass the instances map
       );
     } catch (e) {
       // Handle parsing errors gracefully
@@ -125,15 +129,21 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
     });
   }
 
+  // Add method to handle widget value changes
+  void _handleWidgetValueChanged(dynamic value) {
+    setState(() {
+      // Widgets can update their state - we need to re-render
+      _parseMarkdown();
+    });
+  }
+
   @override
   void didUpdateWidget(FlexMarkdownWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.data != widget.data ||
         oldWidget.isPrintMode != widget.isPrintMode ||
         oldWidget.baseFontSize != widget.baseFontSize ||
-        oldWidget.formFieldConfigurations != widget.formFieldConfigurations ||
-        oldWidget.customWidgets != widget.customWidgets) {
-      // Add check for custom widgets
+        oldWidget.formFieldConfigurations != widget.formFieldConfigurations) {
       // Add this check
       // Check for font size changes
       _currentData = widget.data ?? '';
@@ -142,7 +152,6 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
       _baseFontSize = widget.baseFontSize; // Update font size state
       _formFieldConfigurations =
           widget.formFieldConfigurations; // Update configurations
-      _customWidgets = widget.customWidgets; // Update custom widgets
       // If configurations changed, we need to re-initialize form values
       if (oldWidget.formFieldConfigurations != widget.formFieldConfigurations) {
         _initializeFormValues();
@@ -155,6 +164,8 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
 
   @override
   void dispose() {
+    // Clear any stateful widgets we might have created
+    _customWidgetInstances.clear();
     _controller.dispose();
     super.dispose();
   }
@@ -488,6 +499,14 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
               }).toList(),
             ),
 
+          // Add widget button
+          if (config.formFields.visible)
+            IconButton(
+              icon: Icon(Icons.widgets),
+              tooltip: 'Insert Custom Widget',
+              onPressed: _applyCustomWidget,
+            ),
+
           // Add print mode toggle
           if (config.showPrintModeToggle) ...[
             SizedBox(width: config.largeSpacerWidth),
@@ -550,6 +569,11 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
         _applySelect();
         break;
     }
+  }
+
+  void _applyCustomWidget() {
+    _insertInlineElement(
+        '{{widget:button|my_button|text:Click Me;color:blue}}');
   }
 
   Widget _buildMarkdownPreview() {
