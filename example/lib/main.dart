@@ -33,6 +33,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  // Add a new counter variable for the StatefulBuilder
+  int _builderCounter = 0;
 
   void _incrementCounter() {
     setState(() {
@@ -207,10 +209,13 @@ And here's a custom card widget:
 ### Interactive Widgets
 This counter widget is interactive: <<counter|value=0|label=Current count:>>
 
+Here's a button that changes its label when clicked: <<changeable_button|label=Click to Change Me|color=purple>>
+
 ### Styling Widgets
 You can pass styling parameters:
 
 <<button|label=Styled Button|color=green|fontSize=18|borderRadius=8>>
+
 
 ---
 
@@ -225,6 +230,51 @@ Built with Flutter and FlexMarkdown.
       body: SingleChildScrollView(
         child: Column(
           children: [
+            StatefulBuilder(
+              builder: (context, setState) {
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'COUNTER VALUE: $_builderCounter',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove),
+                            onPressed: () {
+                              setState(() => _builderCounter--);
+                              log(
+                                'Counter decremented. New value: $_builderCounter',
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 16),
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: () {
+                              setState(() => _builderCounter++);
+                              log(
+                                'Counter incremented. New value: $_builderCounter',
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
             FlexMarkdownWidget(
               data: markdownData,
               isHorizontalLayout: true,
@@ -492,10 +542,11 @@ Built with Flutter and FlexMarkdown.
                       int.tryParse(params['value'] ?? '0') ?? 0;
                   final label = params['label'] ?? 'Count:';
 
+                  // Declare count variable outside the builder to persist its value
+                  int count = initialValue;
+
                   return StatefulBuilder(
                     builder: (context, setState) {
-                      int count = initialValue;
-
                       return Container(
                         padding: const EdgeInsets.all(16),
                         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -525,6 +576,103 @@ Built with Flutter and FlexMarkdown.
                               ],
                             ),
                           ],
+                        ),
+                      );
+                    },
+                  );
+                },
+
+                'changeable_button': (context, params) {
+                  // Get initial parameters
+                  final initialLabel = params['label'] ?? 'Changeable Button';
+                  final color = params['color'] ?? 'purple';
+
+                  // Determine button color
+                  Color buttonColor;
+                  switch (color.toLowerCase()) {
+                    case 'purple':
+                      buttonColor = Colors.purple;
+                      break;
+                    case 'blue':
+                      buttonColor = Colors.blue;
+                      break;
+                    case 'red':
+                      buttonColor = Colors.red;
+                      break;
+                    case 'green':
+                      buttonColor = Colors.green;
+                      break;
+                    default:
+                      buttonColor = Colors.purple;
+                  }
+                  String currentLabel = initialLabel;
+
+                  return StatefulBuilder(
+                    builder: (context, setState) {
+                      // Use a variable to store the current label
+
+                      return ElevatedButton(
+                        onPressed: () async {
+                          // Show a dialog with text field to change the label
+                          final TextEditingController textController =
+                              TextEditingController(text: currentLabel);
+
+                          final String? newLabel = await showDialog<String>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Change Button Label'),
+                                content: TextField(
+                                  controller: textController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'New Label',
+                                  ),
+                                  autofocus: true,
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(null);
+                                    },
+                                    child: const Text('CANCEL'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(
+                                        context,
+                                      ).pop(textController.text);
+                                    },
+                                    child: const Text('OK'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+
+                          // Update the button label if a new value was provided
+                          if (newLabel != null && newLabel.isNotEmpty) {
+                            setState(() {
+                              currentLabel = newLabel;
+                            });
+
+                            // Show a confirmation message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Label updated to: $newLabel'),
+                              ),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: buttonColor,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                        ),
+                        child: Text(
+                          currentLabel,
+                          style: const TextStyle(color: Colors.white),
                         ),
                       );
                     },
