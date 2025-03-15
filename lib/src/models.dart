@@ -592,7 +592,6 @@ class MixedContentElement extends MarkdownElement {
         // Form elements in print mode should be rendered as text
         final formWidget = element.build(context);
         if (formWidget is Text) {
-          log(formWidget.toString());
           spans.add(
             TextSpan(
               text: formWidget.data,
