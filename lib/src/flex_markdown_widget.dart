@@ -333,25 +333,33 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
             // Text formatting buttons
             if (config.bold.visible)
               IconButton(
-                icon: Icon(config.bold.icon),
+                icon: config.bold.icon != null
+                    ? Icon(config.bold.icon)
+                    : Icon(Icons.format_bold),
                 tooltip: config.bold.tooltip,
                 onPressed: _applyBold,
               ),
             if (config.italic.visible)
               IconButton(
-                icon: Icon(config.italic.icon),
+                icon: config.italic.icon != null
+                    ? Icon(config.italic.icon)
+                    : Icon(Icons.format_italic),
                 tooltip: config.italic.tooltip,
                 onPressed: _applyItalic,
               ),
             if (config.code.visible)
               IconButton(
-                icon: Icon(config.code.icon),
+                icon: config.code.icon != null
+                    ? Icon(config.code.icon)
+                    : Icon(Icons.code),
                 tooltip: config.code.tooltip,
                 onPressed: _applyCode,
               ),
             if (config.indent.visible)
               IconButton(
-                icon: Icon(config.indent.icon),
+                icon: config.indent.icon != null
+                    ? Icon(config.indent.icon)
+                    : Icon(Icons.format_indent_increase),
                 tooltip: config.indent.tooltip,
                 onPressed: _applyIndent,
               ),
@@ -361,7 +369,9 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
             if (config.headingDropdown.visible)
               PopupMenuButton<int>(
                 tooltip: config.headingDropdown.tooltip,
-                icon: Icon(config.headingDropdown.icon),
+                icon: config.headingDropdown.icon != null
+                    ? Icon(config.headingDropdown.icon)
+                    : Icon(Icons.title),
                 onSelected: _applyHeading,
                 itemBuilder: (context) => [
                   PopupMenuItem(
@@ -407,25 +417,33 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
             // Block formatting buttons
             if (config.blockquote.visible)
               IconButton(
-                icon: Icon(config.blockquote.icon),
+                icon: config.blockquote.icon != null
+                    ? Icon(config.blockquote.icon)
+                    : Icon(Icons.format_quote),
                 tooltip: config.blockquote.tooltip,
                 onPressed: _applyBlockquote,
               ),
             if (config.codeBlock.visible)
               IconButton(
-                icon: Icon(config.codeBlock.icon),
+                icon: config.codeBlock.icon != null
+                    ? Icon(config.codeBlock.icon)
+                    : Icon(Icons.code_rounded),
                 tooltip: config.codeBlock.tooltip,
                 onPressed: _applyCodeBlock,
               ),
             if (config.bulletList.visible)
               IconButton(
-                icon: Icon(config.bulletList.icon),
+                icon: config.bulletList.icon != null
+                    ? Icon(config.bulletList.icon)
+                    : Icon(Icons.format_list_bulleted),
                 tooltip: config.bulletList.tooltip,
                 onPressed: _applyBulletList,
               ),
             if (config.numberedList.visible)
               IconButton(
-                icon: Icon(config.numberedList.icon),
+                icon: config.numberedList.icon != null
+                    ? Icon(config.numberedList.icon)
+                    : Icon(Icons.format_list_numbered),
                 tooltip: config.numberedList.tooltip,
                 onPressed: _applyNumberedList,
               ),
@@ -434,25 +452,33 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
             // Special elements
             if (config.link.visible)
               IconButton(
-                icon: Icon(config.link.icon),
+                icon: config.link.icon != null
+                    ? Icon(config.link.icon)
+                    : Icon(Icons.link),
                 tooltip: config.link.tooltip,
                 onPressed: _applyLink,
               ),
             if (config.table.visible)
               IconButton(
-                icon: Icon(config.table.icon),
+                icon: config.table.icon != null
+                    ? Icon(config.table.icon)
+                    : Icon(Icons.table_chart),
                 tooltip: config.table.tooltip,
                 onPressed: _applyTable,
               ),
             if (config.center.visible)
               IconButton(
-                icon: Icon(config.center.icon),
+                icon: config.center.icon != null
+                    ? Icon(config.center.icon)
+                    : Icon(Icons.format_align_center),
                 tooltip: config.center.tooltip,
                 onPressed: _applyCenter,
               ),
             if (config.horizontalRule.visible)
               IconButton(
-                icon: Icon(config.horizontalRule.icon),
+                icon: config.horizontalRule.icon != null
+                    ? Icon(config.horizontalRule.icon)
+                    : Icon(Icons.horizontal_rule),
                 tooltip: config.horizontalRule.tooltip,
                 onPressed: _applyHorizontalRule,
               ),
@@ -462,7 +488,9 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
             if (config.formFields.visible)
               PopupMenuButton<String>(
                 tooltip: config.formFields.tooltip,
-                icon: Icon(config.formFields.icon),
+                icon: config.formFields.icon != null
+                    ? Icon(config.formFields.icon)
+                    : Icon(Icons.input),
                 onSelected: _applyFormField,
                 itemBuilder: (context) => [
                   PopupMenuItem(

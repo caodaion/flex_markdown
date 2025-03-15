@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 /// Base class for controller button configuration
 class ControllerButtonConfiguration {
   final String tooltip;
-  final IconData icon;
+  final IconData? icon;
   final bool visible;
 
   const ControllerButtonConfiguration({
     required this.tooltip,
-    required this.icon,
+    this.icon,
     this.visible = true,
   });
 }
