@@ -637,42 +637,50 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
   @override
   Widget build(BuildContext context) {
     if (widget.isHorizontalLayout) {
-      return Column(
-        children: [
-          Container(
-            height: widget.minHeight,
-            constraints: BoxConstraints(minHeight: widget.minHeight),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (widget.showTextField) ...[
+      if (widget.showTextField) {
+        // Only use fixed height when showing text field
+        return Column(
+          children: [
+            Container(
+              height: widget.minHeight,
+              constraints: BoxConstraints(minHeight: widget.minHeight),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                   Expanded(child: _buildTextField()),
                   SizedBox(width: 16),
+                  _buildMarkdownPreview(),
                 ],
-                _buildMarkdownPreview(),
-              ],
+              ),
             ),
-          ),
-        ],
-      );
+          ],
+        );
+      } else {
+        // When text field is hidden, let the preview take all available space
+        return IntrinsicWidth(child: Container(child: _buildMarkdownPreview()));
+      }
     } else {
-      return Column(
-        children: [
-          Container(
-            height: widget.minHeight,
-            constraints: BoxConstraints(minHeight: widget.minHeight),
-            child: Column(
-              children: [
-                if (widget.showTextField) ...[
+      if (widget.showTextField) {
+        // Only use fixed height when showing text field
+        return Column(
+          children: [
+            Container(
+              height: widget.minHeight,
+              constraints: BoxConstraints(minHeight: widget.minHeight),
+              child: Column(
+                children: [
                   Expanded(child: _buildTextField()),
                   SizedBox(height: 16),
+                  Expanded(child: _buildMarkdownPreview()),
                 ],
-                Expanded(child: _buildMarkdownPreview()),
-              ],
+              ),
             ),
-          ),
-        ],
-      );
+          ],
+        );
+      } else {
+        // When text field is hidden, let the preview take all available space
+        return IntrinsicWidth(child: Container(child: _buildMarkdownPreview()));
+      }
     }
   }
 }
