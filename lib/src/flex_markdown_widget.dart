@@ -657,7 +657,7 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
         );
       } else {
         // When text field is hidden, let the preview take all available space
-        return IntrinsicWidth(child: Container(child: _buildMarkdownPreview()));
+        return IntrinsicWidth(child: _buildMarkdownPreview());
       }
     } else {
       if (widget.showTextField) {
@@ -679,7 +679,7 @@ class _FlexMarkdownWidgetState extends State<FlexMarkdownWidget> {
         );
       } else {
         // When text field is hidden, let the preview take all available space
-        return IntrinsicWidth(child: Container(child: _buildMarkdownPreview()));
+        return IntrinsicWidth(child: _buildMarkdownPreview());
       }
     }
   }
